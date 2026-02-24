@@ -1,0 +1,29 @@
+/* colors.css - Simple 3-color system */
+
+:root {
+
+    
+
+    /* Main colors */
+    --color-bg: #1d2630;          /* Dark background */
+    --color-accent: #2a4b50;      /* Cyan - panels, modals, buttons */
+    --color-text: #ffffff;        /* White text */
+
+    --text-color-light: #cdc4ac;
+    
+    /* Derived colors */
+    --color-border: var(--color-accent);
+    --color-btn: var(--color-accent);
+    --color-panel: rgba(0, 217, 255, 0.1);  /* Subtle accent background */
+}
+
+body {
+    color: var(--text-color-light);
+}
+.textColorLight {
+    color: var(--text-color-light);
+}
+
+.textColorDark {
+    color: var(--color-bg);
+}
