@@ -3,29 +3,45 @@
  * 
  * App-specific subscription management for RaftGuru
  * High-level functions that use the generic websocket.ts
+ * 
+ * Pattern: Subscribe to collections with filters instead of individual items
+ * - Batches collection (filter: isCurrent === true)
+ * - Tiles collection (filter: batch === currentBatchId)
+ * - Rafts collection (filter: tile.batch === currentBatchId)
  */
 
 import { 
-    initWebSocket, 
-    addSubscription,
     addCollectionSubscription,
-    removeSubscription 
+    removeSubscription
 } from './websocket'
-import { getBatch, updateTile, updateRaft } from './testProcess'
+import { 
+    reactToBatchCreate,
+    reactToBatchUpdate,
+    reactToBatchDelete,
+    reactToRaftCreate,
+    reactToRaftUpdate, 
+    reactToRaftDelete,
+    reactToTileCreate,
+    reactToTileUpdate,
+    reactToTileDelete
+} from './subscriptionReactions'
+
+import {
+    loadBatch
+} from '@/composables/testProcess'
 
 export {
-    startBatchWatcher,
-    stopBatchWatcher,
-    startMainSubscription,
-    stopMainSubscription,
-    addItem,
-    removeItem
+    initializeSubscriptions,
+    startTilesSubscription,
+    startRaftsSubscription,
+    stopBatchSubscriptions
 }
 
 
 /**
  * Start watching the batches collection
- * Automatically loads new active batches when created
+ * Filters for isCurrent === true
+ * App should call initializeCurrentBatch() when a current batch is detected
  * 
  * (Assumes WebSocket is already initialized via initWebSocket())
  */
@@ -33,157 +49,113 @@ function startBatchWatcher() {
     addCollectionSubscription(
         'batches-list',
         'batches',
-        async (msg) => {
-            // Only handle subscription messages (updates to batches)
-            if (msg.type === 'subscription' && msg.data?.length) {
-                const batches = msg.data as any[]
-                
-                batches.forEach(batch => {
-                    if (batch.isCurrent === true) {
-                        console.log('[BatchWatcher] active batch found:', batch.id)
-                        getBatch(batch.id).catch(err => 
-                            console.error('[BatchWatcher] failed to load batch:', err)
-                        )
-                    }
-                })
-            } else if (msg.type === 'delete') {
-                // Batch deletion is handled by main subscription
-                console.log('[BatchWatcher] batch deleted (handled by main subscription)')
-            }
-        },
-        // No filter - subscribe to all batches, filter client-side for isCurrent=true
-        undefined,
-        ['id', 'isCurrent']
-    )
-}
-
-/**
- * Stop watching the batches collection
- */
-function stopBatchWatcher() {
-    removeSubscription('batches-list')
-    console.log('[BatchWatcher] stopped')
-}
-
-/**
- * Start main subscription for a specific batch
- * Subscribes to the batch and automatically cascades to tiles/rafts
- */
-function startMainSubscription(batchId: string) {
-    // Subscribe to this batch
-    addSubscription(
-        `batch-${batchId}`,
-        'batches',
-        batchId,
         (msg) => {
-            if (msg.type === 'subscription' && msg.data?.length) {
+            const event = msg.event
+
+            if(event === 'create') {
                 const batch = msg.data[0]
-                console.log('[MainSubscription] batch updated:', batch)
-                
-                // Handle tiles cascade
-                handleTilesCascade(batch.tiles || [])
-            } else if (msg.type === 'delete') {
-                console.log('[MainSubscription] batch was deleted:', batchId)
+                reactToBatchCreate(batch)
+            } else if(event === 'update') {
+                reactToBatchUpdate(msg.data[0])
+            } else if(event === 'delete') {
+                reactToBatchDelete()
             }
         },
-        ['id', 'tiles', 'date_created', 'isCurrent']
+        { isCurrent: { _eq: true } },
+        ['*,tiles.*,tiles.rafts.*']
     )
 }
 
-/**
- * Stop main subscription for a batch and all its cascaded items
- */
-function stopMainSubscription(batchId: string) {
-    removeSubscription(`batch-${batchId}`)
-    console.log('[MainSubscription] stopped for batch', batchId)
-}
 
 /**
- * Add subscription for a tile or raft
- * Used when a new item needs to be watched
+ * Start subscription for tiles in a specific batch
+ * Filters for batch === batchId
  */
-function addItem(
-    uid: string,
-    collection: 'tiles' | 'rafts',
-    itemId: string,
-    callback: ItemHandler
-) {
-    const fields = collection === 'tiles' 
-        ? ['id', 'ref', 'standup', 'rafts', 'batch']
-        : ['id', 'time_inflation', 'presure1', 'presure2', 'tile']
-
-    addSubscription(
-        uid,
-        collection,
-        itemId,
+function startTilesSubscription(batchId: string) {
+    addCollectionSubscription(
+        'tiles-list',
+        'tiles',
         (msg) => {
-            if (msg.type === 'subscription' && msg.data?.length) {
-                const item = msg.data[0]
-                console.log(`[Item] ${collection} updated:`, item)
+            const event = msg.event
 
-                // Update store based on collection type
-                if (collection === 'tiles') {
-                    updateTile(item)
-                    // Handle cascade for rafts
-                    if (item.rafts?.length) {
-                        handleRaftsCascade(item.rafts)
-                    }
-                } else if (collection === 'rafts') {
-                    updateRaft(item)
-                }
-            } else if (msg.type === 'delete') {
-                console.log(`[Item] ${collection} was deleted:`, itemId)
+            if(event === 'create') {
+                console.log('[WS] - tile created', msg.data)
+                reactToTileCreate(msg.data[0])
+            } else if(event === 'update') {
+                reactToTileUpdate(msg.data[0])
+            } else if(event === 'delete') {
+                console.log('[WS] : Tile deleted event received')
+                reactToTileDelete(msg.data[0])
             }
-
-            callback(msg)
         },
-        fields
+        { batch: { _eq: batchId } },
+        ['*','rafts.*']
     )
+    console.log('[TileSubscription] started for batch', batchId)
 }
 
 /**
- * Remove subscription for a tile or raft
+ * Stop subscription for tiles
  */
-function removeItem(uid: string) {
-    removeSubscription(uid)
-    console.log('[Item] subscription removed:', uid)
+function stopTileSubscription() {
+    removeSubscription('tiles-list')
+    console.log('[TileSubscription] stopped')
 }
 
 /**
- * Internal: Handle cascade when tiles array changes
- * Subscribe to any new tiles not yet watched
+ * Start subscription for rafts in tiles of a specific batch
+ * Note: Raft data is already included in tile subscriptions (fields: '*,rafts.*')
+ * This subscription is not needed since tile updates contain full raft objects
  */
-function handleTilesCascade(tileIds: string[]) {
-    tileIds.forEach(tileId => {
-        const uid = `tile-${tileId}`
-        
-        addItem(
-            uid,
-            'tiles',
-            tileId,
-            () => {}  // Tile updates are handled in addItem's subscription handler
-        )
-    })
+function startRaftsSubscription(batchId: string) {
+    addCollectionSubscription(
+        'rafts-list',
+        'rafts',
+        (msg) => {
+            const event = msg.event
+
+            if(event === 'create') {
+                console.log('[WS] - Raft created', msg.data[0])
+                reactToRaftCreate(msg.data[0])
+            } else if(event === 'update') {
+                reactToRaftUpdate(msg.data[0])
+            } else if(event === 'delete') {
+                reactToRaftDelete(msg.data[0])
+            }
+        },
+        { },
+        ['*,tile.ref']
+    )
+    console.log('[raftsubscription] started for batch', batchId)
 }
 
 /**
- * Internal: Handle cascade when rafts array changes
- * Subscribe to any new rafts not yet watched
+ * Stop subscription for rafts
+ * Note: Since raft data comes through tile subscriptions, nothing to stop here
  */
-function handleRaftsCascade(raftIds: string[]) {
-    raftIds.forEach(raftId => {
-        const uid = `raft-${raftId}`
-        
-        addItem(
-            uid,
-            'rafts',
-            raftId,
-            () => {}  // Raft updates are handled in addItem's subscription handler
-        )
-    })
+function stopRaftSubscription() {
+    // No separate raft subscription exists, so nothing to stop
+    console.log('[RaftSubscription] stopped (using tile subscriptions)')
+}
+
+/**
+ * Initialize all app-level subscriptions
+ * Called once on app startup to watch for current batch changes
+ * Tile and raft subscriptions are started separately when a batch is loaded
+ */
+function initializeSubscriptions() {
+    startBatchWatcher()
+    console.log('[subscriptions] initialized')
+}
+
+/**
+ * Stop batch-specific subscriptions (tiles and rafts)
+ * Called when a batch is closed
+ */
+function stopBatchSubscriptions() {
+    stopTileSubscription()
+    stopRaftSubscription()
+    console.log('[subscriptions] tiles and rafts subscriptions stopped')
 }
 
 
-// --- Types ---
-
-type ItemHandler = (msg: any) => void

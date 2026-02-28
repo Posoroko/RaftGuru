@@ -3,9 +3,9 @@ import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import Icon from '@/components/Icon/Main.vue'
 import Raft from '@/components/Raft/Main.vue'
 import TimeParser from '@/components/Widgets/TimeParser.vue'
-import NewRaftModal from '@/components/Overlay/Modal/RaftSetup.vue'
+import RaftSetupModal from '@/components/Overlay/Modal/RaftSetup.vue'
 import TileModal from '@/components/Overlay/Modal/Tile.vue'
-import { currentBatch, tiles, createTile, currentTileForModal } from '@/composables/testProcess'
+import { currentBatch, tiles, createTile } from '@/composables/testProcess'
 import { useModal } from '@/composables/useModal'
 
 const props = defineProps({
@@ -29,9 +29,12 @@ async function createTileAndAddFirstRaft() {
     console.log('new tile:', newTile)
     if (newTile) {
         await showModal(
-        NewRaftModal, 
+        RaftSetupModal, 
         {
-            tileId: newTile.id
+            raftSetup: {
+                mode: 'create',
+                tileId: newTile.id
+            }
         }
     )
     }
@@ -61,10 +64,6 @@ const raftCount = computed(() => {
     return tiles.value[props.tileRef]?.rafts?.length
 })
 
-const firstRaft = computed(() => {
-    return tiles.value[props.tileRef]?.rafts?.[0]
-})
-
 const currentTime = ref(new Date())
 
 onMounted(() => {
@@ -76,34 +75,51 @@ onMounted(() => {
 })
 
 const checkpointStatus = computed(() => {
-    if (!firstRaft.value?.time_inflation) return null
+    const tile = tiles.value[props.tileRef]
+    if (!tile?.rafts?.length) return null
     
     const now = currentTime.value
-    const p1Date = new Date(firstRaft.value.time_inflation)
-    p1Date.setMinutes(p1Date.getMinutes() + 30)
+    let hasReachedCheckpoint = false
+    let hasFiveMinutesAway = false
     
-    const p2Date = new Date(firstRaft.value.time_inflation)
-    p2Date.setMinutes(p2Date.getMinutes() + 90)
+    // Check all rafts and their pressure times
+    tile.rafts.forEach(raft => {
+        // Check pressure 1
+        if (raft.time_pressure1) {
+            const p1Date = new Date(raft.time_pressure1)
+            if (now > p1Date) {
+                hasReachedCheckpoint = true
+            } else {
+                const fiveMinBefore = new Date(p1Date.getTime() - 5 * 60 * 1000)
+                if (now >= fiveMinBefore) {
+                    hasFiveMinutesAway = true
+                }
+            }
+        }
+        
+        // Check pressure 2
+        if (raft.time_pressure2) {
+            const p2Date = new Date(raft.time_pressure2)
+            if (now > p2Date) {
+                hasReachedCheckpoint = true
+            } else {
+                const fiveMinBefore = new Date(p2Date.getTime() - 5 * 60 * 1000)
+                if (now >= fiveMinBefore) {
+                    hasFiveMinutesAway = true
+                }
+            }
+        }
+    })
     
-    const fiveMinBefore1 = new Date(p1Date.getTime() - 5 * 60 * 1000)
-    const fiveMinBefore2 = new Date(p2Date.getTime() - 5 * 60 * 1000)
-    
-    // Check if any checkpoint has been reached (expired)
-    if (now > p1Date || now > p2Date) {
-        return 'checkpointReached'
-    }
-    
-    // Check if within 5 minutes of any checkpoint
-    if (now >= fiveMinBefore1 || now >= fiveMinBefore2) {
-        return 'fiveMinutesAway'
-    }
-    
+    if (hasReachedCheckpoint) return 'checkpointReached'
+    if (hasFiveMinutesAway) return 'fiveMinutesAway'
     return null
 })
 </script>
 
 <template>
     <div 
+
         class="
             tile
             full
@@ -113,27 +129,6 @@ const checkpointStatus = computed(() => {
         :class="checkpointStatus || (tileExists ? 'activeSurface': '')"
         @click="handleClick"
     >
-        <!-- <div 
-            class="
-                topBar
-                flex justifyBetween
-            "
-        >
-            <div
-                v-if="tiles[props.tileRef]?.rafts?.length" 
-                class="rafts"
-            >
-                
-            </div>
-
-            <Icon
-                size="lg"
-                class="standupIcon"
-                :class="[isStandup ? 'active' : '']"
-            >
-                storage
-            </Icon>
-        </div> -->
         <div
             v-if="currentBatch.id"
             class="
@@ -195,7 +190,7 @@ const checkpointStatus = computed(() => {
                         >
                             <TimeParser
                                 :timestamp="raft.time_pressure1"
-                                :flashing="true"
+                                flashing
                             />
                         </div>
                     </div>
@@ -219,7 +214,7 @@ const checkpointStatus = computed(() => {
                         <div class="time">
                             <TimeParser
                                 :timestamp="raft.time_pressure2"
-                                :flashing="true"
+                                flashing
                             />
                         </div>
                     </div>
@@ -243,13 +238,13 @@ const checkpointStatus = computed(() => {
 }
 
 .tile.fiveMinutesAway {
-    outline: 1px solid rgba(249, 174, 35, 0.651);
-    background-color: rgba(254, 146, 14, 0.521);
+    outline: 1px solid var(--outline-fiveMinutes);
+    background-color: var(--bgc-fiveMinutes);
 }
 
 .tile.checkpointReached {
-    outline: 1px solid rgba(255, 0, 0, 0.5);
-    background-color: rgba(255, 0, 0, 0.2);
+    outline: 1px solid var(--outline-reached);
+    background-color: var(--bgc-reached);
 }
 
 .standupIcon {

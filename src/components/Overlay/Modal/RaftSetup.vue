@@ -8,9 +8,9 @@ import { currentBatch, currentTileForModal, createRaft, updateRaft } from '@/com
 
 const { modalState, confirm, cancel } = useModal()
 
-const mode = computed(() => modalState.value.data?.newRaft?.mode || 'create')
-const resetRaftId = computed(() => modalState.value.data?.newRaft?.resetRaftId)
-const tileId = computed(() => modalState.value.data?.newRaft?.tileId)
+const mode = computed(() => modalState.value.data?.raftSetup?.mode || 'create')
+const resetRaftId = computed(() => modalState.value.data?.raftSetup?.resetRaftId)
+const tileId = computed(() => modalState.value.data?.raftSetup?.tileId)
 
 const inflationTime = ref<Date | null>(null)
 const serialNumber = ref<string>('SN')

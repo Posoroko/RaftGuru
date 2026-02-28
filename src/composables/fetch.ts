@@ -22,49 +22,45 @@ async function dbFetch<T>(p: {
     query?: Record<string, any>
     headers?: Record<string, string>
 }): Promise<{ data: T }> {
-
-    // Build URL with query params if provided
     let url = `${dbUrl}${p.endpoint}`
 
     if (p.query) {
         const params = new URLSearchParams()
         Object.entries(p.query).forEach(([key, value]) => {
-            // Convert objects to JSON strings, others to string
             const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value)
             params.append(key, stringValue)
         })
         url += `?${params.toString()}`
     }
 
-    const options: RequestInit = {
+    const response = await fetch(url, {
         method: p.method,
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...p.headers
-        }
-    }
-
-    if (p.body) {
-        options.body = JSON.stringify(p.body)
-    }
-
-    const response = await fetch(url, options)
+        },
+        body: p.body ? JSON.stringify(p.body) : undefined
+    })
 
     if (!response.ok) {
-        const errorBody = await response.text().catch(() => 'no body')
-        console.error(`[dbFetch] ${p.method} ${p.endpoint} → ${response.status}`, errorBody)
+        console.log('[dbFetch] : response.ok is not ok ')
         throw new Error(`${p.method} ${p.endpoint} failed: ${response.status}`)
     }
 
-    // Handle empty responses (e.g., DELETE requests returning 204 No Content)
+    // Read response as text first to handle empty bodies
     const text = await response.text()
-    if (!text) {
-        return { data: null }
+    
+    // If response body is empty, return early (common for DELETE requests)
+    if (!text || text.trim() === '') {
+        return { data: null } as any
     }
 
-    const res = JSON.parse(text)
-    return res
+    // Parse as JSON if there's content
+    const jsonResponse = JSON.parse(text)
+
+    console.log('jsonresponse!:', jsonResponse)
+    return jsonResponse
 }
 
 // Helpers
@@ -79,7 +75,7 @@ async function dbGet<T>(p: {
         query: p.query
     })
 
-    return res.data
+    return res.data || res
 }
 
 async function dbPost<T>(p: {
@@ -96,10 +92,7 @@ async function dbPost<T>(p: {
         headers: p.headers
     })
 
-    if (res?.data) {
-        return res.data
-    }
-    return res as T
+    return res.data || res
 }
 
 async function dbPatch<T>(p: {
@@ -114,11 +107,11 @@ async function dbPatch<T>(p: {
         query: p.query
     })
 
-    return res.data
+    return res.data || res
 }
 
-async function dbDelete<T>(endpoint: string): Promise<void> {
-    await dbFetch<T>({
+async function dbDelete(endpoint: string): Promise<void> {
+    await dbFetch({
         method: 'DELETE',
         endpoint: endpoint
     })

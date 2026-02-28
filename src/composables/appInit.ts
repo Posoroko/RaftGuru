@@ -1,7 +1,7 @@
 import { useAppState } from './useAppState'
 import { useAuth } from './useAuth'
-import { loadCurrentBatch } from './testProcess'
-import { startBatchWatcher } from './subscriptions'
+import { initializeCurrentBatch } from './testProcess'
+import { initializeSubscriptions } from './subscriptions'
 import { useUser } from '@/composables/useUser'
 
 export const useAppInit = async () => {
@@ -10,14 +10,17 @@ export const useAppInit = async () => {
 
     if (appState.value.initialized) return
 
-    // autoLogin fetches user data and populates userState, then starts batch watcher
+    // autoLogin establishes WebSocket connection and fetches user data
     await autoLogin()
+
+    // Initialize subscriptions after WebSocket is connected
+    initializeSubscriptions()
 
     const { userState } = useUser()
 
-    // Load current batch from database
+    // Initialize app with current batch from database
     if(userState.value.isLoggedIn) {
-        await loadCurrentBatch()
+        await initializeCurrentBatch()
     }
     
     appState.value.initialized = true

@@ -204,3 +204,9 @@ label.hiddenInput input {
 }
 
 .aspectRatio1by1 { aspect-ratio: 1 / 1;}
+
+.radius4 { border-radius: 4px; }
+.radius5 { border-radius: 5px; }
+.radius8 { border-radius: 8px; }
+.radius10 { border-radius: 10px; }
+.radius20 { border-radius: 20px; }

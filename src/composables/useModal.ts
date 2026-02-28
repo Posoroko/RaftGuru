@@ -22,9 +22,22 @@ interface ConfirmationModalProps {
     cancelText?: string
 }
 
+type RaftSetupProps = {
+    mode: 'create' | 'reset'
+    resetRaftId?: string
+    tileId?: string
+}
+
 interface ModalState {
     visible: boolean
     modal: any
+    data: {
+        tileId?: string
+        tileRef?: string
+        raftId?: string
+        confirmationProps?: ConfirmationModalProps
+        raftSetup?: RaftSetupProps
+    }
     confirmationProps?: ConfirmationModalProps
     resolveFn?: (value: any) => void
     rejectFn?: (reason?: any) => void
@@ -33,7 +46,12 @@ interface ModalState {
 const modalState = ref<ModalState>({
     visible: false,
     modal: undefined,
-    confirmationProps: undefined,
+    data: {
+        tileId: undefined,
+        tileRef: undefined,
+        raftId: undefined,
+        confirmationProps: undefined
+    },
     resolveFn: undefined,
     rejectFn: undefined
 })
@@ -46,11 +64,18 @@ function useModal() {
      */
     const showModal = (
         modal: any,
-        confirmationProps: ConfirmationModalProps
+        data?: {
+            tileId?: string
+            tileRef?: string
+            raftId?: string
+            confirmationProps?: ConfirmationModalProps
+            raftSetup?: RaftSetupProps
+        }
     ) => {
         modalState.value.modal = modal
-        if(confirmationProps) {
-            modalState.value.confirmationProps = confirmationProps
+        modalState.value.data = { 
+            ...modalState.value.data,
+            ...data 
         }
         modalState.value.visible = true
 

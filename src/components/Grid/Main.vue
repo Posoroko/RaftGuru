@@ -1,5 +1,5 @@
 <script setup>
-import Cell from '../Cell/Main.vue'
+import Tile from '../Tile/Main.vue'
 </script>
 
 <template>
@@ -19,17 +19,17 @@ import Cell from '../Cell/Main.vue'
             <div 
                 class="cell"
             >
-                <Cell tileRef="A-0" />
+                <Tile tileRef="A-0" />
             </div>
             
             <div class="cell">
-                <Cell tileRef="A-1" />
+                <Tile tileRef="A-1" />
             </div>
 
             <div 
                 class="cell"
             >
-                <Cell tileRef="A-2" />
+                <Tile tileRef="A-2" />
             </div>
         </div>
 
@@ -43,19 +43,19 @@ import Cell from '../Cell/Main.vue'
             <div 
                 class="cell"
             >
-                <Cell tileRef="B-0" />
+                <Tile tileRef="B-0" />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Cell tileRef="B-1" />
+                <Tile tileRef="B-1" />
             </div>
 
             <div 
                 class="cell"
             >
-                <Cell tileRef="B-2" />
+                <Tile tileRef="B-2" />
             </div>
         </div>
 
@@ -69,19 +69,19 @@ import Cell from '../Cell/Main.vue'
             <div 
                 class="cell"
             >
-                <Cell tileRef="C-0" />
+                <Tile tileRef="C-0" />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Cell tileRef="C-1" />
+                <Tile tileRef="C-1" />
             </div>
 
             <div 
                 class="cell"
             >
-                <Cell tileRef="C-2" />
+                <Tile tileRef="C-2" />
             </div>
         </div>
 
@@ -95,19 +95,19 @@ import Cell from '../Cell/Main.vue'
             <div 
                 class="cell"
             >
-                <Cell tileRef="D-0" />
+                <Tile tileRef="D-0" />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Cell tileRef="D-1" />
+                <Tile tileRef="D-1" />
             </div>
 
             <div 
                 class="cell"
             >
-                <Cell tileRef="D-2" />
+                <Tile tileRef="D-2" />
             </div>
         </div>
     </div>

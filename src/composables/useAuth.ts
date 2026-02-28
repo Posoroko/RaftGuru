@@ -1,7 +1,6 @@
 import { dbPost } from './fetch'
 import { useUser } from './useUser'
 import { initWebSocket } from './websocket'
-import { startBatchWatcher } from './subscriptions'
 
 export const useAuth = () => {
 
@@ -23,7 +22,6 @@ export const useAuth = () => {
         }
         
         await initWebSocket()
-        startBatchWatcher() 
         return loginSuccess
     }
 
@@ -34,7 +32,6 @@ export const useAuth = () => {
             const { getUserData } = useUser()
             const result = await getUserData()
             await initWebSocket()
-            startBatchWatcher()
             return result
         } catch (err) {
             console.error('[useAuth] autoLogin failed:', err)

@@ -18,9 +18,9 @@ const subscriptions = new Set<string>()
 // Promise to wait for WebSocket connection
 let wsReadyPromise: Promise<void> | null = null
 
-// Simple message dispatcher
+// Map of subscription handlers by uid
 type MessageHandler = (msg: any) => void
-const dispatchers = new Map<string, MessageHandler>()
+const handlers = new Map<string, MessageHandler>()
 
 /**
  * Initialize WebSocket connection
@@ -46,7 +46,7 @@ function initWebSocket(): Promise<void> {
 
         ws.addEventListener('message', (event) => {
             const msg = JSON.parse(event.data)
-            createDispatcher(msg)
+            dispatcher(msg)
         })
 
         ws.addEventListener('close', () => {
@@ -54,7 +54,7 @@ function initWebSocket(): Promise<void> {
             ws = null
             wsReadyPromise = null
             subscriptions.clear()
-            dispatchers.clear()
+            handlers.clear()
         })
 
         ws.addEventListener('error', (err) => {
@@ -87,7 +87,7 @@ function addSubscription(
     }
 
     subscriptions.add(uid)
-    dispatchers.set(uid, handler)
+    handlers.set(uid, handler)
 
     ws.send(JSON.stringify({
         type: 'subscribe',
@@ -124,7 +124,7 @@ function addCollectionSubscription(
     }
 
     subscriptions.add(uid)
-    dispatchers.set(uid, handler)
+    handlers.set(uid, handler)
 
     ws.send(JSON.stringify({
         type: 'subscribe',
@@ -154,7 +154,7 @@ function removeSubscription(uid: string) {
     }
 
     subscriptions.delete(uid)
-    dispatchers.delete(uid)
+    handlers.delete(uid)
 
     ws.send(JSON.stringify({
         type: 'unsubscribe',
@@ -165,32 +165,22 @@ function removeSubscription(uid: string) {
 }
 
 /**
- * Create dispatcher: route messages to appropriate handlers based on uid
+ * Handle incoming WebSocket messages: ping/pong keepalive and route to handlers
  */
-function createDispatcher(msg: any) {
-    const { uid, type, data } = msg
+function dispatcher(msg: any) {
+    const { uid, type } = msg
 
-    // Find handler for this uid
-    const handler = dispatchers.get(uid)
-    if (!handler) {
-        console.warn(`[WS] no handler for uid: ${uid}`)
+    // Handle ping/pong to keep connection alive
+    if (type === 'ping') {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'pong' }))
+        }
         return
     }
 
-    // Handle different message types
-    if (type === 'subscription') {
-        // New data or update
-        console.log(`[WS] subscription update for ${uid}:`, data)
-        handler(msg)
-    } else if (type === 'delete') {
-        // Item was deleted
-        console.log(`[WS] item deleted: ${uid}`)
-        handler(msg)
-    } else if (type === 'error') {
-        // Error occurred
-        console.error(`[WS] error for ${uid}:`, data)
-    } else {
-        console.log(`[WS] unknown message type "${type}" for ${uid}:`, data)
+    // Route subscription messages to their handlers
+    const handler = handlers.get(uid)
+    if (handler) {
         handler(msg)
     }
 }
@@ -203,7 +193,7 @@ function closeWebSocket() {
         ws.close()
         ws = null
         subscriptions.clear()
-        dispatchers.clear()
+        handlers.clear()
     }
     console.log('[WS] closed')
 }

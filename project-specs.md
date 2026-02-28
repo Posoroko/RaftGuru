@@ -71,7 +71,7 @@ If 1st measurement fails:
 **Schedule settings:**
 - All break/lunch times are **hardcoded** (not editable)
 - Only **end of day** time changes: 15:45 (39h) or 12:30 (35h/Fri)
-- 35h/39h preference stored in Firebase per user
+- 35h/39h preference stored per user
 
 ### Alarm Behavior
 
@@ -96,8 +96,8 @@ If 1st measurement fails:
 ### Stack
 
 - **Frontend**: Vue 3 + Vite + PWA (vite-plugin-pwa)
-- **Backend**: Firebase (Firestore + Auth)
-- **Hosting**: Firebase Hosting or Netlify
+- **Backend**: Backend API with websocket support
+- **Hosting**: TBD
 
 ### Architecture
 
@@ -106,11 +106,27 @@ If 1st measurement fails:
 - Component-based UI
 - All data operations through `useRaftStore` composable (Firebase abstraction layer)
 
+### State Management
+
+**One-way flow: Database as source of truth**
+
+1. **Send to Database Only**: All create/update/delete operations are sent directly to the database via API
+2. **Database Broadcasts**: The database sends a websocket message to all connected clients
+3. **Reaction Functions Update State**: Subscription reaction functions (`subscriptionReactions.ts`) listen for these websocket messages and handle local state updates
+4. **No Manual State Updates**: We do NOT manually update local state alongside database operations
+
+**Why this approach?**
+- Eliminates race conditions between local updates and incoming websocket messages
+- Prevents duplicate data (no conflicting synchronized updates)
+- Single source of truth (database state is the only state that persists)
+- Simplifies logic: no need to filter or reconcile local changes with incoming updates
+- Faster perceived performance: database operations complete quickly, while local state updates automatically when the message arrives
+
 ### Authentication
 
-- Firebase Authentication
+- Backend API authentication
 - Login page required before accessing main app
-- Auth methods: Email/password (expandable to Google, etc.)
+- Auth methods: Email/password (expandable to other methods)
 - User session persisted
 
 ### PWA Features
@@ -149,7 +165,12 @@ Multi-line attributes with classes on separate lines:
 
 ### ✅ DO:
 ```vue
-<div class="gridBox cellWide">    <!-- camelCase -->
+<div 
+    class="
+        titleBox 
+        flex justifyCenter
+    "
+>    <!-- camelCase and multiline calsses when multiple classes.-->
 ```
 
 ---
@@ -305,7 +326,7 @@ Each tile can be in one of two modes:
 
 ## Data Model
 
-### UserPreferences (stored in Firebase per user)
+### UserPreferences (stored per user)
 ```javascript
 {
   userId: string,
@@ -386,9 +407,9 @@ Each tile can be in one of two modes:
 
 ## Composables
 
-- `useRaftStore.js` - All data operations (Firebase abstraction layer)
+- `useRaftStore.js` - All data operations (database abstraction layer)
 - `useTileConfig.js` - Tile mode storage (single/multi per position)
-- `useAuth.js` - Firebase authentication
+- `useAuth.js` - Authentication
 - `useTimer.js` - Time calculations, countdowns, alerts
 - `useWorkSchedule.js` - Hardcoded break times, user's 35h/39h preference (from Firebase)
 - `useModal.js` - Modal state management
