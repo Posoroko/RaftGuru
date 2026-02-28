@@ -84,26 +84,15 @@ const checkpointStatus = computed(() => {
     
     // Check all rafts and their pressure times
     tile.rafts.forEach(raft => {
-        // Check pressure 1
-        if (raft.time_pressure1) {
-            const p1Date = new Date(raft.time_pressure1)
-            if (now > p1Date) {
-                hasReachedCheckpoint = true
-            } else {
-                const fiveMinBefore = new Date(p1Date.getTime() - 5 * 60 * 1000)
-                if (now >= fiveMinBefore) {
-                    hasFiveMinutesAway = true
-                }
-            }
-        }
+        // Determine which pressure time to check based on validation status
+        const pressureTime = raft.pressure1Valid ? raft.time_pressure2 : raft.time_pressure1
         
-        // Check pressure 2
-        if (raft.time_pressure2) {
-            const p2Date = new Date(raft.time_pressure2)
-            if (now > p2Date) {
+        if (pressureTime) {
+            const pressureDate = new Date(pressureTime)
+            if (now > pressureDate) {
                 hasReachedCheckpoint = true
             } else {
-                const fiveMinBefore = new Date(p2Date.getTime() - 5 * 60 * 1000)
+                const fiveMinBefore = new Date(pressureDate.getTime() - 5 * 60 * 1000)
                 if (now >= fiveMinBefore) {
                     hasFiveMinutesAway = true
                 }

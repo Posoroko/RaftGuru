@@ -125,6 +125,7 @@ async function deleteRaftHandler() {
 
 const pressure1Status = computed(() => {
     if (!raft.value?.time_pressure1) return null
+    if (raft.value?.pressure1Valid) return 'valid'
     if (isCheckpointReached(raft.value.time_pressure1)) return 'reached'
     if (isFiveMinutesAway(raft.value.time_pressure1)) return 'fiveMinutesAway'
     return null
@@ -132,6 +133,7 @@ const pressure1Status = computed(() => {
 
 const pressure2Status = computed(() => {
     if (!raft.value?.time_pressure2) return null
+    if (raft.value?.pressure2Valid) return 'valid'
     if (isCheckpointReached(raft.value.time_pressure2)) return 'reached'
     if (isFiveMinutesAway(raft.value.time_pressure2)) return 'fiveMinutesAway'
     return null
@@ -163,13 +165,13 @@ const pressure2Status = computed(() => {
             <!-- Pressure 1 -->
             <div 
                 class="flex column gap10 pad10 radius8"
-                :class="[pressure1Status === 'reached' ? 'checkpointReached' : pressure1Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : '']"
+                :class="[pressure1Status === 'reached' ? 'checkpointReached' : pressure1Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure1Status === 'valid' ? 'valid' : '']"
             >
                 <div class="flex alignCenter gap10">
                     <Icon>speed</Icon>
                     <span>Pression 1 (30 min)</span>
                 </div>
-                <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure1" :flashing="true" />
+                <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure1" :flashing="!raft?.pressure1Valid" />
                 <div class="flex gap10">
                     <button 
                         v-if="canValidatePressure1() && !raft?.pressure1Valid"
@@ -192,13 +194,13 @@ const pressure2Status = computed(() => {
             <!-- Pressure 2 -->
             <div 
                 class="flex column gap10 pad10 radius8"
-                :class="[pressure2Status === 'reached' ? 'checkpointReached' : pressure2Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : '']"
+                :class="[pressure2Status === 'reached' ? 'checkpointReached' : pressure2Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure2Status === 'valid' ? 'valid' : '']"
             >
                 <div class="flex alignCenter gap10">
                     <Icon>speed</Icon>
                     <span>Pression 2 (90 min)</span>
                 </div>
-                <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure2" :flashing="true" />
+                <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure2" :flashing="!raft?.pressure2Valid" />
                 <div class="flex gap10">
                     <button 
                         v-if="canValidatePressure2() && !raft?.pressure2Valid"
@@ -248,6 +250,11 @@ const pressure2Status = computed(() => {
 .checkpointReached {
     border-left: 4px solid var(--outline-reached);
     background-color: var(--bgc-reached);
+}
+
+.valid {
+    border-left: 4px solid rgba(143, 255, 128, 0.6);
+    background-color: rgba(143, 255, 128, 0.15);
 }
 
 .actions {

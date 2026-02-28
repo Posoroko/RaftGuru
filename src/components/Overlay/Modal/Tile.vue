@@ -58,14 +58,23 @@ function getRaftCheckpointStatus(raft: any): string | null {
     if (!raft) return null
     const now = currentTime.value
     
-    // Check if checkpoint reached
-    if (raft?.time_pressure1 && now > new Date(raft.time_pressure1)) return 'checkpointReached'
-    if (raft?.time_pressure2 && now > new Date(raft.time_pressure2)) return 'checkpointReached'
-    
-    // Check if checkpoint 5 minutes away
-    const fiveMinFromNow = new Date(now.getTime() + 5 * 60 * 1000)
-    if (raft?.time_pressure1 && new Date(raft.time_pressure1) <= fiveMinFromNow && new Date(raft.time_pressure1) > now) return 'fiveMinutesAway'
-    if (raft?.time_pressure2 && new Date(raft.time_pressure2) <= fiveMinFromNow && new Date(raft.time_pressure2) > now) return 'fiveMinutesAway'
+    // Determine which pressure to check based on validation
+    if (raft.pressure1Valid) {
+        // Pressure 1 is validated, check pressure 2
+        if (raft?.time_pressure2) {
+            if (raft.pressure2Valid) return null
+            if (now > new Date(raft.time_pressure2)) return 'checkpointReached'
+            const fiveMinFromNow = new Date(now.getTime() + 5 * 60 * 1000)
+            if (new Date(raft.time_pressure2) <= fiveMinFromNow && new Date(raft.time_pressure2) > now) return 'fiveMinutesAway'
+        }
+    } else {
+        // Pressure 1 not validated yet, check pressure 1
+        if (raft?.time_pressure1) {
+            if (now > new Date(raft.time_pressure1)) return 'checkpointReached'
+            const fiveMinFromNow = new Date(now.getTime() + 5 * 60 * 1000)
+            if (new Date(raft.time_pressure1) <= fiveMinFromNow && new Date(raft.time_pressure1) > now) return 'fiveMinutesAway'
+        }
+    }
     
     return null
 }
@@ -279,7 +288,11 @@ const canAddRaft = computed(() => {
                             >
                                 <Icon>speed</Icon>1
                             </div>
+                            <div v-if="raft.pressure1Valid" class="flex alignCenter justifyCenter" style="color: rgba(143, 255, 128, 0.8); font-size: 24px; height: 30px;">
+                                ✓
+                            </div>
                             <TimeParser 
+                                v-else
                                 :timestamp="raft.time_pressure1"
                                 :flashing="true"
                             />
@@ -290,7 +303,11 @@ const canAddRaft = computed(() => {
                             >
                                 <Icon>speed</Icon>2
                             </div>
+                            <div v-if="raft.pressure2Valid" class="flex alignCenter justifyCenter" style="color: rgba(143, 255, 128, 0.8); font-size: 24px; height: 30px;">
+                                ✓
+                            </div>
                             <TimeParser 
+                                v-else
                                 :timestamp="raft.time_pressure2"
                                 :flashing="true"
                             />
