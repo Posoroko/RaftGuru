@@ -169,7 +169,7 @@ const pressure2Status = computed(() => {
             >
                 <div class="flex alignCenter gap10">
                     <Icon>speed</Icon>
-                    <span>Pression 1 (30 min)</span>
+                    <span>1</span>
                 </div>
                 <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure1" :flashing="!raft?.pressure1Valid" />
                 <div class="flex gap10">
@@ -198,7 +198,7 @@ const pressure2Status = computed(() => {
             >
                 <div class="flex alignCenter gap10">
                     <Icon>speed</Icon>
-                    <span>Pression 2 (90 min)</span>
+                    <span>2</span>
                 </div>
                 <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure2" :flashing="!raft?.pressure2Valid" />
                 <div class="flex gap10">

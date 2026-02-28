@@ -1,6 +1,7 @@
 import { dbPost } from './fetch'
 import { useUser } from './useUser'
 import { initWebSocket } from './websocket'
+import { initializeCurrentBatch } from '@/composables/testProcess'
 
 export const useAuth = () => {
 
@@ -20,7 +21,7 @@ export const useAuth = () => {
         if (loginSuccess?.access_token) {
             localStorage.setItem('raftguru_access_token', loginSuccess.access_token)
         }
-        
+        await initializeCurrentBatch()
         await initWebSocket()
         return loginSuccess
     }
@@ -31,6 +32,7 @@ export const useAuth = () => {
             console.log('auto login, getting user data')
             const { getUserData } = useUser()
             const result = await getUserData()
+            await initializeCurrentBatch()
             await initWebSocket()
             return result
         } catch (err) {
@@ -56,6 +58,8 @@ export const useAuth = () => {
         } finally {
             // Clear stored tokens regardless of API response
             localStorage.removeItem('raftguru_access_token')
+            // Reload the app to reset all state
+            location.reload()
         }
     }
 
