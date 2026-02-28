@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Icon from '../../Icon/Main.vue'
-import TimeSelector from './Widgets/TimeSelector.vue'
+import TimeSelector from '@/components/Overlay/Modal/Widgets/TImeSelector.vue'
 import TimeParser from '@/components/Widgets/TimeParser.vue'
 import { useModal } from '@/composables/useModal'
 import { currentBatch, currentTileForModal, createRaft, updateRaft } from '@/composables/testProcess'
