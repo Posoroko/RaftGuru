@@ -47,7 +47,7 @@ export const useAuth = () => {
             await dbPost<any>({
                 endpoint: '/auth/logout',
                 body: {
-                    mode: 'cookie'
+                    mode: 'session'
                 },
                 headers
             })
