@@ -4,8 +4,8 @@ import Icon from '@/components/Icon/Main.vue'
 
 const emit = defineEmits(['timeChange'])
 
-function roundToNearestTen(date: Date): Date {
-    const minutes = Math.round(date.getMinutes() / 10) * 10
+function roundToNearestFive(date: Date): Date {
+    const minutes = Math.round(date.getMinutes() / 5) * 5
     const rounded = new Date(date)
     rounded.setMinutes(minutes)
     rounded.setSeconds(0)
@@ -13,7 +13,7 @@ function roundToNearestTen(date: Date): Date {
     return rounded
 }
 
-const now = computed(() => roundToNearestTen(new Date()))
+const now = computed(() => roundToNearestFive(new Date()))
 
 const currentHour = computed(() => now.value.getHours())
 const currentMinuteTen = computed(() => now.value.getMinutes())
@@ -54,6 +54,14 @@ function toggleAddFiveMin() {
     emit('timeChange', selectedTime.value)
 }
 
+function handleResetToCurrentTime() {
+    const currentRounded = roundToNearestFive(new Date())
+    selectedHour.value = currentRounded.getHours()
+    selectedMinuteTen.value = currentRounded.getMinutes()
+    addFiveMin.value = false
+    emit('timeChange', selectedTime.value)
+}
+
 function formatTime(date: Date): string {
     const h = String(date.getHours()).padStart(2, '0')
     const m = String(date.getMinutes()).padStart(2, '0')
@@ -66,9 +74,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="timeSelector flex column gap20">
-        
-
+    <div
+        class="
+            timeSelector
+            flex column gap20
+            relative
+        "
+    >
         <div
             class="
                 selectorBox
@@ -108,21 +120,31 @@ onMounted(() => {
                 </button>
             </div>
 
-                   <div class="timeHeader flex justifyCenter alignCenter gap10">
+            <div class="timeHeader flex justifyCenter alignCenter gap10">
 
-            <button
-                @click.prevent.stop="toggleAddFiveMin"
-                class="fiveMinBtn"
-                :class="{
-                    activeSurface: addFiveMin
-                }"
+                <button
+                    @click.prevent.stop="toggleAddFiveMin"
+                    class="fiveMinBtn"
+                    :class="{
+                        activeSurface: addFiveMin
+                    }"
+                >
+                    +05
+                </button>
+            </div>
+
+            <div
+                @click="handleResetToCurrentTime"
+                class="
+                    absolute right0 bottom0 
+                    pad10 pointer centered
+                "
             >
-                +05
-            </button>
+                <Icon>
+                    nest_clock_farsight_analog
+                </Icon>
+            </div>
         </div>
-        </div>
-
- 
     </div>
 </template>
 

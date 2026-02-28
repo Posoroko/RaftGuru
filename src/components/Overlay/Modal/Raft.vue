@@ -6,7 +6,7 @@ import { useModal } from '@/composables/useModal'
 import { tiles, updateRaft, deleteRaft } from '@/composables/testProcess'
 import NewRaftModal from './RaftSetup.vue'
 
-const { modalState, cancel } = useModal()
+const { modalState, cancel, showModal } = useModal()
 
 const tileRef = computed(() => {
     return modalState.value.data?.tileRef
@@ -41,6 +41,7 @@ onMounted(() => {
 })
 
 function getLocalISOString(date: Date): string {
+    // Create ISO string using LOCAL time, not UTC
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -82,6 +83,7 @@ async function validatePressure1() {
             pressure1Valid: true
         })
         console.log('[Raft Modal] Pressure 1 validated')
+        cancel()
     } catch (err) {
         console.error('[Raft Modal] failed to validate pressure1:', err)
     }
@@ -95,6 +97,7 @@ async function validatePressure2() {
             pressure2Valid: true
         })
         console.log('[Raft Modal] Pressure 2 validated')
+        cancel()
     } catch (err) {
         console.error('[Raft Modal] failed to validate pressure2:', err)
     }
@@ -144,79 +147,96 @@ const pressure2Status = computed(() => {
     <div 
         class="flex column gap20"
     >
-        <div class="flex justifyBetween alignCenter">
-            <h2>Radeau {{ raft?.serialNumber || '' }}</h2>
+        <div 
+            class="
+                flex justifyBetween alignCenter
+            "
+        >
+            <h2>
+                Radeau {{ raft?.serialNumber || '' }}
+            </h2>
             
-            <button
+            <div
                 @click.prevent.stop="cancel"
                 class="pointer">
-                ✕
-            </button>
+                <Icon
+                    size="lg"
+                >
+                    close
+                </Icon>
+            </div>
         </div>
 
-        <div class="flex column gap20">
+        <div class="flex column gap10">
             <!-- Inflation -->
-            <div class="flex gap10">
-                <Icon>tire_repair</Icon>
- 
+            <div 
+                class="timeRow flex alignCenter justifyBetween pad10 radius8"
+                :class="'waiting'"
+            >
+                <div class="flex alignCenter gap10" style="flex: 0 0 auto;">
+                    <Icon>tire_repair</Icon>
+                </div>
+                
                 <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_inflation" />
+                
+                <div style="flex: 0 0 80px;"></div>
             </div>
 
             <!-- Pressure 1 -->
             <div 
-                class="flex column gap10 pad10 radius8"
-                :class="[pressure1Status === 'reached' ? 'checkpointReached' : pressure1Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure1Status === 'valid' ? 'valid' : '']"
+                class="timeRow flex alignCenter justifyBetween pad10 radius8"
+                :class="[pressure1Status === 'reached' ? 'checkpointReached' : pressure1Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure1Status === 'valid' ? 'valid' : 'waiting']"
             >
-                <div class="flex alignCenter gap10">
+                <div class="flex alignCenter gap10" style="flex: 0 0 auto;">
                     <Icon>speed</Icon>
                     <span>1</span>
                 </div>
+
                 <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure1" :flashing="!raft?.pressure1Valid" />
-                <div class="flex gap10">
+                
+                <div class="actionArea">
                     <button 
                         v-if="canValidatePressure1() && !raft?.pressure1Valid"
                         @click="validatePressure1"
-                        class="pointer centered"
-                        style="flex: 1"
+                        class="validateBtn pointer"
                     >
                         Valider
                     </button>
-                    <span 
-                        v-if="raft?.pressure1Valid"
-                        class="flex alignCenter justifyCenter"
-                        style="flex: 1; color: var(--color-valid);"
+                    <Icon 
+                        v-else-if="raft?.pressure1Valid"
+                        class="validIcon"
                     >
-                        ✓ Validé
-                    </span>
+                        check_circle
+                    </Icon>
                 </div>
             </div>
 
             <!-- Pressure 2 -->
             <div 
-                class="flex column gap10 pad10 radius8"
-                :class="[pressure2Status === 'reached' ? 'checkpointReached' : pressure2Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure2Status === 'valid' ? 'valid' : '']"
+                class="timeRow flex alignCenter justifyBetween pad10 radius8"
+                :class="[pressure2Status === 'reached' ? 'checkpointReached' : pressure2Status === 'fiveMinutesAway' ? 'fiveMinutesAway' : pressure2Status === 'valid' ? 'valid' : 'waiting']"
             >
-                <div class="flex alignCenter gap10">
+                <div class="flex alignCenter gap10" style="flex: 0 0 auto;">
                     <Icon>speed</Icon>
                     <span>2</span>
                 </div>
+                
                 <TimeParser class="textXl fontWeightBold" :timestamp="raft?.time_pressure2" :flashing="!raft?.pressure2Valid" />
-                <div class="flex gap10">
+                
+                <div class="actionArea">
                     <button 
                         v-if="canValidatePressure2() && !raft?.pressure2Valid"
                         @click="validatePressure2"
-                        class="pointer centered"
-                        style="flex: 1"
+                        class="validateBtn pointer"
                     >
                         Valider
                     </button>
-                    <span 
-                        v-if="raft?.pressure2Valid"
-                        class="flex centered"
-                        style="flex: 1; color: var(--color-valid);"
+                    <Icon 
+                        v-else-if="raft?.pressure2Valid"
+                        class="validIcon"
                     >
-                        ✓ Validé
-                    </span>
+                        check_circle
+                    </Icon>
                 </div>
             </div>
         </div>
@@ -225,14 +245,14 @@ const pressure2Status = computed(() => {
         <div class="actions flex gap10">
             <button
                 @click="resetRaft"
-                class="pointer"
+                class="pointer centered"
                 style="flex: 1"
             >
                 Réinitialiser
             </button>
             <button
                 @click="deleteRaftHandler"
-                class="pointer"
+                class="pointer centered"
                 style="flex: 1; background-color: rgba(255, 0, 0, 0.2); color: rgb(255, 100, 100);"
             >
                 Supprimer
@@ -242,19 +262,57 @@ const pressure2Status = computed(() => {
 </template>
 
 <style scoped>
-.fiveMinutesAway {
-    border-left: 4px solid var(--outline-warning);
+.timeRow {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.timeRow.waiting {
+    border-left-color: rgba(100, 150, 200, 0.6);
+    background-color: rgba(100, 150, 200, 0.1);
+}
+
+.timeRow.fiveMinutesAway {
+    border-left-color: var(--outline-warning);
     background-color: var(--bgc-warning);
 }
 
-.checkpointReached {
-    border-left: 4px solid var(--outline-reached);
+.timeRow.checkpointReached {
+    border-left-color: var(--outline-reached);
     background-color: var(--bgc-reached);
 }
 
-.valid {
-    border-left: 4px solid rgba(143, 255, 128, 0.6);
+.timeRow.valid {
+    border-left-color: rgba(143, 255, 128, 0.6);
     background-color: rgba(143, 255, 128, 0.15);
+}
+
+.actionArea {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.validateBtn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: rgba(143, 255, 128, 0.3);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.validateBtn:hover {
+    background-color: rgba(143, 255, 128, 0.5);
+}
+
+.validIcon {
+    font-size: 1.5rem;
+    color: rgba(143, 255, 128, 0.8);
 }
 
 .actions {

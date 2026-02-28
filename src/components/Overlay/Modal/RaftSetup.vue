@@ -13,6 +13,9 @@ const resetRaftId = computed(() => modalState.value.data?.raftSetup?.resetRaftId
 const tileId = computed(() => modalState.value.data?.raftSetup?.tileId)
 
 const inflationTime = ref<Date | null>(null)
+const time_pressure1 = ref<string | null>(null)
+const time_pressure2 = ref<string | null>(null)
+
 const serialNumber = ref<string>('SN')
 const letters = ['SN', 'E', 'F', 'G', 'H']
 
@@ -34,6 +37,7 @@ function selectLetter(letter: string) {
 }
 
 function getLocalISOString(date: Date): string {
+    // Create ISO string using LOCAL time, not UTC
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -43,22 +47,15 @@ function getLocalISOString(date: Date): string {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
 }
 
-const pressure1Time = computed(() => {
-    if (!inflationTime.value) return null
-    const date = new Date(inflationTime.value)
-    date.setMinutes(date.getMinutes() + 30)
-    return date
-})
-
-const pressure2Time = computed(() => {
-    if (!inflationTime.value) return null
-    const date = new Date(inflationTime.value)
-    date.setMinutes(date.getMinutes() + 90)
-    return date
-})
-
 function handleTimeChange(newTime: Date) {
     inflationTime.value = new Date(newTime)
+    
+    // Calculate pressure times and store as ISO strings
+    const p1 = new Date(newTime.getTime() + 30 * 60 * 1000)
+    const p2 = new Date(newTime.getTime() + 90 * 60 * 1000)
+    
+    time_pressure1.value = getLocalISOString(p1)
+    time_pressure2.value = getLocalISOString(p2)
 }
 
 async function handleSubmit() {
@@ -67,21 +64,14 @@ async function handleSubmit() {
             throw new Error('No tile selected')
         }
 
-        if (!inflationTime.value) {
-            throw new Error('No inflation time selected')
+        if (!inflationTime.value || !time_pressure1.value || !time_pressure2.value) {
+            throw new Error('Missing time values')
         }
 
-        // Calculate pressure times
-        const pressure1Date = new Date(inflationTime.value)
-        pressure1Date.setMinutes(pressure1Date.getMinutes() + 30)
-        
-        const pressure2Date = new Date(inflationTime.value)
-        pressure2Date.setMinutes(pressure2Date.getMinutes() + 90)
-
         const raftData = {
-            time_inflation: getLocalISOString(inflationTime.value),
-            time_pressure1: getLocalISOString(pressure1Date),
-            time_pressure2: getLocalISOString(pressure2Date),
+            time_inflation: inflationTime.value,
+            time_pressure1: time_pressure1.value,
+            time_pressure2: time_pressure2.value,
             pressure1Valid: false,
             pressure2Valid: false,
             ...(serialNumber.value && { serialNumber: serialNumber.value })
@@ -195,7 +185,7 @@ function handleCancel() {
                     <span>1</span>
                 </label>
                 <TimeParser 
-                    :timestamp="pressure1Time"
+                    :timestamp="time_pressure1"
                     class="readOnlyTime text3xl fontWeightBold"
                 />
             </div>
@@ -208,7 +198,7 @@ function handleCancel() {
                     <span>2</span>    
                 </label>
                 <TimeParser 
-                    :timestamp="pressure2Time"
+                    :timestamp="time_pressure2"
                     class="readOnlyTime text3xl fontWeightBold"
                 />
             </div>

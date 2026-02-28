@@ -81,9 +81,18 @@ const checkpointStatus = computed(() => {
     const now = currentTime.value
     let hasReachedCheckpoint = false
     let hasFiveMinutesAway = false
+    let isTestComplete = false
     
     // Check all rafts and their pressure times
     tile.rafts.forEach(raft => {
+        // Check if test is complete: both pressures validated and time passed pressure2
+        if (raft.pressure1Valid && raft.pressure2Valid && raft.time_pressure2) {
+            const pressure2Date = new Date(raft.time_pressure2)
+            if (now > pressure2Date) {
+                isTestComplete = true
+            }
+        }
+        
         // Determine which pressure time to check based on validation status
         const pressureTime = raft.pressure1Valid ? raft.time_pressure2 : raft.time_pressure1
         
@@ -100,6 +109,7 @@ const checkpointStatus = computed(() => {
         }
     })
     
+    if (isTestComplete) return 'testComplete'
     if (hasReachedCheckpoint) return 'checkpointReached'
     if (hasFiveMinutesAway) return 'fiveMinutesAway'
     return null
@@ -143,25 +153,33 @@ const checkpointStatus = computed(() => {
                 class="
                     full
                     rafts
-                    flex alignCenter gap10
+                    flex alignCenter gap10 justifyCenter
                 "
             >
                 <div 
                     v-for="raft in tiles[props.tileRef].rafts"
                     class="
-                        grow
-                        flex column alignCenter gap10
+                        raftCulumn
+                        h100
+                        flex column alignCenter justifyCenter gap10
                     "
                 >
-                    <Raft
-                        :standup="isStandup"
-                    />
+                    <div 
+                        class="
+                            grow
+                            centered
+                        "
+                    >
+                        <Raft
+                            :standup="isStandup"
+                        />
+                    </div>
 
                     <div 
                         v-if="!raft.pressure1Valid"
                         class="
                             grow
-                            flex column alignCenter justifyCenter
+                            flex column alignCenter justifyEvenly
                         "
                     >
                         <div
@@ -180,15 +198,16 @@ const checkpointStatus = computed(() => {
                             <TimeParser
                                 :timestamp="raft.time_pressure1"
                                 flashing
+                                class="textXl fontWeightBold"
                             />
                         </div>
                     </div>
 
                     <div
-                        v-if="raft.pressure1Valid"
+                        v-if="raft.pressure1Valid && !raft.pressure2Valid"
                         class="
-                            grow
-                            flex column alignCenter
+                            grow 
+                            flex column alignCenter justifyEvenly
                         "
                     >
                         <div
@@ -204,8 +223,23 @@ const checkpointStatus = computed(() => {
                             <TimeParser
                                 :timestamp="raft.time_pressure2"
                                 flashing
+                                class="textXl fontWeightBold"
                             />
                         </div>
+                    </div>
+
+                    <div
+                        v-if="raft.pressure1Valid && raft.pressure2Valid"
+                        class="
+                            grow
+                            flex column alignCenter justifyCenter
+                        "
+                    >
+                        <Icon
+                            size="xl"
+                        >
+                            check_circle
+                        </Icon>
                     </div>
                 </div>
             </div>
@@ -234,6 +268,11 @@ const checkpointStatus = computed(() => {
 .tile.checkpointReached {
     outline: 1px solid var(--outline-reached);
     background-color: var(--bgc-reached);
+}
+
+.tile.testComplete {
+    outline: 1px solid rgba(41, 204, 90, 0.5);
+    background-color: rgba(38, 206, 89, 0.453);
 }
 
 .standupIcon {
