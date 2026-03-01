@@ -1,18 +1,25 @@
 {
-  "name": "raftguru",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "vite-plugin-pwa": "^1.2.0",
-    "vue": "^3.3.4"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.3.4",
-    "vite": "^4.4.9"
-  }
+    "name": "raftguru",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "dev:server": "nitro dev",
+        "build": "vite build && nitro build",
+        "preview": "vite preview",
+        "start": "node .output/server/index.mjs"
+    },
+    "dependencies": {
+        "vite-plugin-pwa": "^0.19.8",
+        "vue": "^3.4.21"
+    },
+    "devDependencies": {
+        "vite": "^5.2.10",
+        "@vitejs/plugin-vue": "^5.0.4",
+        "nitropack": "^2.13.1"
+    },
+    "overrides": {
+        "esbuild": "^0.25.0",
+        "serialize-javascript": "^7.0.3"
+    }
 }
