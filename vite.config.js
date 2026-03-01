@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png'],
       manifest: {
-        name: 'RaftGuru',
-        short_name: 'RaftGuru',
-        description: 'Raft testing and monitoring application',
+        name: 'TestGuru',
+        short_name: 'TestGuru',
+        description: 'Outil de gestion des tests de radeaux de survie.',
         theme_color: '#1a1a1a',
         background_color: '#ffffff',
         display: 'standalone',
@@ -37,7 +37,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//]
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//]
       }
     })
   ],
@@ -51,7 +51,7 @@ export default defineConfig({
       key: fs.readFileSync('./raftguru.posoroko.com+2-key.pem'),
       cert: fs.readFileSync('./raftguru.posoroko.com+2.pem')
     },
-    host: 'dev.raftguru.posoroko.com',
+    host: 'dev.testguru.posoroko.com',
     port: 3000,
     open: true
   }

@@ -9,9 +9,11 @@ const { getUserData } = useUser()
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
+const errorMessage = ref('')
 
 const handleSubmit = async () => {
     isLoading.value = true
+    errorMessage.value = ''
 
     try {
         await login(email.value, password.value)
@@ -19,7 +21,11 @@ const handleSubmit = async () => {
         email.value = ''
         password.value = ''
     } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        errorMessage.value = message
         console.error('Login failed:', err)
+        // Log to localStorage for mobile debugging
+        localStorage.setItem('login_error', `${new Date().toISOString()}: ${message}`)
     } finally {
         isLoading.value = false
     }
@@ -57,6 +63,10 @@ const handleSubmit = async () => {
                 :disabled="isLoading"
                 required
             />
+
+            <div v-if="errorMessage" class="errorMessage">
+                {{ errorMessage }}
+            </div>
 
             <div class="centered">
                 <button 
@@ -100,12 +110,18 @@ button {
     font-weight: 600;
 }
 
-button:hover:not(:disabled) {
-    opacity: 0.9;
-}
-
 button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.errorMessage {
+    padding: 10px;
+    background-color: rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    border-radius: 4px;
+    color: #ff4444;
+    font-size: 14px;
+    text-align: center;
 }
 </style>
