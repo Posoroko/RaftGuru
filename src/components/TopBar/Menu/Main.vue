@@ -1,9 +1,11 @@
 <script setup>
 import { defineProps } from 'vue'
 import Icon from '../../Icon/Main.vue'
+import User from '../../Overlay/Modal/User.vue'
 import { currentBatch, closeBatch } from '../../../composables/testProcess'
 import { useUser } from '../../../composables/useUser'
 import { useAuth } from '../../../composables/useAuth'
+import { useModal } from '../../../composables/useModal'
 
 defineProps({
     isOpen: {
@@ -16,6 +18,12 @@ const emit = defineEmits(['close'])
 
 const { userState } = useUser()
 const { logout } = useAuth()
+const { showModal } = useModal()
+
+const handleOpenUserModal = async () => {
+    emit('close')
+    await showModal(User)
+}
 
 const handleCloseBatch = async () => {
     await closeBatch()
@@ -34,10 +42,15 @@ const handleLogout = async () => {
     >
         <div class="menuContent">
             <!-- User Info -->
-            <div class="menuSection">
-                <p class="menuLabel">User</p>
-                <p class="menuValue">{{ userState.first_name || 'Unknown' }}</p>
-            </div>
+            <button 
+                class="userButton"
+                @click="handleOpenUserModal"
+            >
+                <div class="menuSection">
+                    <p class="menuLabel">User</p>
+                    <p class="menuValue">{{ userState.first_name || 'Unknown' }}</p>
+                </div>
+            </button>
 
             <!-- Batch Info -->
             <div class="menuSection">
@@ -107,6 +120,22 @@ const handleLogout = async () => {
     color: var(--text-primary, #fff);
     margin: 0;
     word-break: break-all;
+}
+
+.userButton {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px;
+    background: rgba(0, 217, 255, 0.05);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.userButton:hover {
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
 }
 
 .closeButton {

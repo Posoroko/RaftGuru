@@ -51,7 +51,7 @@ export default defineConfig({
       key: fs.readFileSync('./raftguru.posoroko.com+2-key.pem'),
       cert: fs.readFileSync('./raftguru.posoroko.com+2.pem')
     },
-    host: 'dev.testguru.posoroko.com',
+    host: 'dev.raftguru.posoroko.com',
     port: 3000,
     open: true
   }

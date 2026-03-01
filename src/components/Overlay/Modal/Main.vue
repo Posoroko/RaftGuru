@@ -8,7 +8,7 @@ import { currentBatch } from '@/composables/testProcess'
 
 const { userState } = useUser()
 
-const { modalState, showModal } = useModal()
+const { modalState, showModal, cancel } = useModal()
 
 </script>
 
@@ -72,11 +72,13 @@ const { modalState, showModal } = useModal()
             justifyCenter
             relative
         "
+        @click="cancel"
     >
         <div 
             class="
                 modal
             "
+            @click.stop
         >
             <component
                 :is="modalState.modal"
