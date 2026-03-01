@@ -30,15 +30,14 @@ export const useAppInit = async () => {
 }
 
 function initEventListeners() {
-    window.addEventListener('pageshow', async () => {
-        console.log('[appInit] App became active - refreshing data')
-
+    // visibilitychange fires when app returns from background on mobile
+    document.addEventListener('visibilitychange', async () => {
+        if (document.hidden) {
+            console.log('[appInit] App going to background')
+            return
+        }
+        
+        console.log('[appInit] App became visible - refreshing data')
         location.reload()
-        
-        // Re-initialize subscriptions in case WebSocket disconnected
-        // initializeSubscriptions()
-        
-        // Re-fetch current batch in case it was deleted or modified
-        // await initializeCurrentBatch()
     })
 }
