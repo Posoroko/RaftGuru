@@ -22,6 +22,23 @@ export const useAppInit = async () => {
     if(userState.value.isLoggedIn) {
         await initializeCurrentBatch()
     }
+
+    // Set up event listeners for app visibility changes
+    initEventListeners()
     
     appState.value.initialized = true
+}
+
+function initEventListeners() {
+    window.addEventListener('pageshow', async () => {
+        console.log('[appInit] App became active - refreshing data')
+
+        location.reload()
+        
+        // Re-initialize subscriptions in case WebSocket disconnected
+        // initializeSubscriptions()
+        
+        // Re-fetch current batch in case it was deleted or modified
+        // await initializeCurrentBatch()
+    })
 }

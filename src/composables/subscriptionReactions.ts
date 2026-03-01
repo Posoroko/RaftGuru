@@ -56,9 +56,9 @@ async function reactToBatchUpdate(batch: any) {
 
 function reactToBatchDelete() {
     try {
-        
-        resetCurrentBatchToDefault()
-        resetTilesToDefault()
+        location.reload()
+        // resetCurrentBatchToDefault()
+        // resetTilesToDefault()
 
         console.log('[Reaction] batch deleted, stopped subscriptions and cleared tiles:', batchId)
     } catch (err) {
