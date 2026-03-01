@@ -13,8 +13,8 @@ Convert RaftGuru to a Progressive Web App (PWA) with minimal complexity. Strateg
   "description": "Raft testing and monitoring application",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a1a1a",
+  "background_color": "#1d2630",
+  "theme_color": "#2a4b50",
   "scope": "/",
   "icons": [
     {
