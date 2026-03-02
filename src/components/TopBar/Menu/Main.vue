@@ -62,13 +62,15 @@ const handleToggleScreenOn = () => {
                 </div>
             </button>
 
-            <!-- Batch Info -->
-            <div class="menuSection">
-                <p class="menuLabel">Batch ID</p>
-                <p class="menuValue" style="font-family: monospace; font-size: 0.85em;">
-                    {{ currentBatch.id || 'None' }}
-                </p>
-            </div>
+            <!-- Always On Button -->
+            <button 
+                class="alwaysOnButton"
+                :class="{ active: keepScreenOn }"
+                @click="handleToggleScreenOn"
+            >
+                <icon size="md">mobile_check</icon>
+                <span>Always On</span>
+            </button>
 
             <!-- Close Batch Button -->
             <button 
@@ -78,16 +80,6 @@ const handleToggleScreenOn = () => {
             >
                 <icon size="md">close</icon>
                 <span>Close Batch</span>
-            </button>
-
-            <!-- Always On Button -->
-            <button 
-                class="alwaysOnButton"
-                :class="{ active: keepScreenOn }"
-                @click="handleToggleScreenOn"
-            >
-                <icon size="md">mobile_check</icon>
-                <span>Always On</span>
             </button>
 
             <!-- Logout Button -->
