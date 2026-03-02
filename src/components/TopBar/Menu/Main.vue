@@ -36,11 +36,12 @@ const handleLogout = async () => {
 }
 
 // c5t_ux
-const handleToggleScreenOn = () => {
-    keepScreenOn.value = !keepScreenOn.value
-    setTimeout(() => {
-        emit('close')
-    }, 1000)
+const handleToggleScreenOn = async () => {
+    const newVal = !keepScreenOn.value
+    console.log('[Menu] Toggling keepScreenOn from', keepScreenOn.value, 'to', newVal)
+    keepScreenOn.value = newVal
+    console.log('[Menu] keepScreenOn is now:', keepScreenOn.value)
+    emit('close')
 }
 </script>
 
