@@ -20,7 +20,8 @@ export default defineNitroConfig({
     // Environment variables
     runtimeConfig: {
         public: {
-            apiBase: process.env.API_BASE || 'http://localhost:3000'
+            apiBase: process.env.DIRECTUS_URL || 'http://localhost:3000'
         }
-    }
+    },
+    compatibilityDate: '2026-03-01'
 })

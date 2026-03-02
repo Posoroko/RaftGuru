@@ -74,6 +74,7 @@ onMounted(() => {
     onBeforeUnmount(() => clearInterval(interval))
 })
 
+// comment_order
 const checkpointStatus = computed(() => {
     const tile = tiles.value[props.tileRef]
     if (!tile?.rafts?.length) return null
@@ -81,17 +82,14 @@ const checkpointStatus = computed(() => {
     const now = currentTime.value
     let hasReachedCheckpoint = false
     let hasFiveMinutesAway = false
-    let isTestComplete = false
+    let allRaftsComplete = true
     
-    // Check all rafts and their pressure times
     tile.rafts.forEach(raft => {
-        // Check if test is complete: both pressures validated and time passed pressure2
-        if (raft.pressure1Valid && raft.pressure2Valid && raft.time_pressure2) {
-            const pressure2Date = new Date(raft.time_pressure2)
-            if (now > pressure2Date) {
-                isTestComplete = true
-            }
-        }
+        const raftComplete = raft.pressure1Valid && raft.pressure2Valid
+        
+        if (raftComplete) return // Skip time checks for completed rafts
+        
+        allRaftsComplete = false
         
         // Determine which pressure time to check based on validation status
         const pressureTime = raft.pressure1Valid ? raft.time_pressure2 : raft.time_pressure1
@@ -109,7 +107,7 @@ const checkpointStatus = computed(() => {
         }
     })
     
-    if (isTestComplete) return 'testComplete'
+    if (allRaftsComplete) return 'testComplete'
     if (hasReachedCheckpoint) return 'checkpointReached'
     if (hasFiveMinutesAway) return 'fiveMinutesAway'
     return null
@@ -284,3 +282,17 @@ const checkpointStatus = computed(() => {
     opacity: 1;
 }
 </style>
+
+<!--
+comment_order
+checkpointStatus state hierarchy (order matters):
+1. testComplete - all rafts have both pressures validated. This MUST win over time-based states,
+   otherwise a tile stays yellow even after validation if we validated early.
+2. checkpointReached - at least one raft has passed its checkpoint time without validation.
+   Urgent: user needs to act now.
+3. fiveMinutesAway - a checkpoint is coming soon. Heads-up, not urgent.
+4. null - no pending checkpoints.
+
+Completed rafts are skipped entirely in the forEach to prevent their future times
+from triggering fiveMinutesAway after early validation.
+-->

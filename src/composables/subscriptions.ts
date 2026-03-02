@@ -26,10 +26,6 @@ import {
     reactToTileDelete
 } from './subscriptionReactions'
 
-import {
-    loadBatch
-} from '@/composables/testProcess'
-
 export {
     initializeSubscriptions,
     startTilesSubscription,
@@ -61,7 +57,11 @@ function startBatchWatcher() {
                 reactToBatchDelete()
             }
         },
-        { isCurrent: { _eq: true } },
+        { 
+            isCurrent: { 
+                _eq: true 
+            }
+        },
         ['*,tiles.*,tiles.rafts.*']
     )
 }
@@ -88,7 +88,11 @@ function startTilesSubscription(batchId: string) {
                 reactToTileDelete(msg.data[0])
             }
         },
-        { batch: { _eq: batchId } },
+        { 
+            batch: { 
+                _eq: batchId 
+            }
+        },
         ['*','rafts.*']
     )
     console.log('[TileSubscription] started for batch', batchId)
@@ -123,7 +127,11 @@ function startRaftsSubscription(batchId: string) {
                 reactToRaftDelete(msg.data[0])
             }
         },
-        { },
+        { 
+            batch: { 
+                _eq: batchId 
+            }
+        },
         ['*,tile.ref']
     )
     console.log('[raftsubscription] started for batch', batchId)

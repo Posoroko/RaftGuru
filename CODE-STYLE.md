@@ -100,6 +100,55 @@ One property per line in multi-line elements:
 - No over-documentation
 - Only explain *why*, not *what* the code does
 
+### Comment Keys
+
+For complex logic that needs explanation (especially for AI agents), use **comment keys** to keep code clean while preserving context.
+
+**How it works:**
+1. Place a short key above the code: `// comment_theme`
+2. Write the full explanation at the end of the file
+3. Use the same key to link them
+
+**Format:** `comment_theme` or `comment_theme_001` (number only if multiple same-theme keys exist)
+
+Keys must be a single "word" (double-click selectable). Use underscores, not hyphens.
+
+**Themes:**
+
+| Theme | Use when... |
+|-------|-------------|
+| `order` | Sequence/hierarchy matters — don't reorder |
+| `appMount` | Important for app loading correctly |
+| `raceCondition` | Race condition or timing sensitivity |
+| `realWorld` | Physical world or business constraint |
+| `db` | Database structure or query consideration |
+| `ux` | UX decision that needs justification |
+| `edgeCase` | Edge case handling |
+| `performance` | Performance optimization |
+| `sync` | Sync/async coordination |
+| `dependency` | External dependency behavior |
+
+**Example in code:**
+
+```js
+// c5t_order
+const checkpointStatus = computed(() => {
+    // ...
+})
+```
+
+**At end of file (outside main tags):**
+
+```html
+<!--
+comment_order
+checkpointStatus state hierarchy (order matters):
+1. testComplete — must win over time-based states
+2. checkpointReached — user needs to act now
+3. fiveMinutesAway — heads-up, not urgent
+4. null — no pending checkpoints
+-->
+
 ## Component Structure Example
 
 ```vue

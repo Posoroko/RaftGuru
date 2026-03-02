@@ -221,11 +221,18 @@ async function deleteTile(tileId: TileId) {
  * @param tileId - The tile ID where the raft will be placed
  * @param raftData - Raft data (without id, tile, user_created, user_updated)
  */
-async function createRaft(tileId: TileId, raftData: Omit<Raft, 'id' | 'tile' | 'user_created' | 'user_updated'>): Promise<Raft | null> {
+async function createRaft(
+    tileId: TileId, 
+    raftData: Omit<Raft, 'id' | 'tile' | 'user_created' | 'user_updated'>
+): Promise<Raft | null> {
     try {
         const newRaft = await dbPost<Raft>({
             endpoint: '/items/rafts',
-            body: { ...raftData, tile: tileId }
+            body: { 
+                ...raftData, 
+                tile: tileId,
+                batch: currentBatch.value.id
+            }
         })
         console.log('[testProcess] raft created:', newRaft?.id)
         return newRaft || null
