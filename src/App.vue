@@ -12,15 +12,22 @@ const { requestWakeLock, releaseWakeLock, isActive, status } = useWakeLock()
 
 onMounted(() => {
     useAppInit()
+    
+    // Initialize wake lock if it was enabled before refresh
+    if (keepScreenOn.value) {
+        console.log('[App] keepScreenOn was enabled, initializing wake lock...')
+        requestWakeLock()
+    }
 })
 
 // c5t_howTo
 watch(keepScreenOn, async (newVal) => {
+    console.log('[App] keepScreenOn changed to:', newVal)
     if (newVal) {
-        console.log('[App] keepScreenOn enabled, requesting wake lock...')
+        console.log('[App] Requesting wake lock...')
         await requestWakeLock()
     } else {
-        console.log('[App] keepScreenOn disabled, releasing wake lock...')
+        console.log('[App] Releasing wake lock...')
         await releaseWakeLock()
     }
 })

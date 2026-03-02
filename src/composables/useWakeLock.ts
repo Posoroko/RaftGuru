@@ -15,12 +15,14 @@ function useWakeLock() {
             if (!navigator.wakeLock) {
                 console.warn('[useWakeLock] Wake Lock API not available in this browser')
                 console.log('[useWakeLock] Supported on: Chrome 84+, Edge 84+, Opera 70+, Android Firefox (experimental)')
+                status.value = 'error'
                 return false
             }
 
             // Check if page is visible
             if (document.hidden) {
                 console.warn('[useWakeLock] Page is hidden/backgrounded - wake lock won\'t work. Bring app to foreground.')
+                status.value = 'error'
                 return false
             }
 
@@ -31,6 +33,7 @@ function useWakeLock() {
                 wakeLock = null
             }
 
+            status.value = 'idle' // Show loading state
             console.log('[useWakeLock] Requesting wake lock...')
             wakeLock = await navigator.wakeLock.request('screen')
             
