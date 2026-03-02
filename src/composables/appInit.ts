@@ -3,12 +3,19 @@ import { useAuth } from './useAuth'
 import { initializeCurrentBatch } from './testProcess'
 import { initializeSubscriptions } from './subscriptions'
 import { useUser } from '@/composables/useUser'
+import { useStorage } from '@/composables/useStorage'
 
 export const useAppInit = async () => {
     const appState = useAppState()
     const { autoLogin } = useAuth()
+    const { value: keepScreenOn } = useStorage('keepScreenOn', false)
 
     if (appState.value.initialized) return
+
+    // Initialize keepScreenOn to false if not already set
+    if (keepScreenOn.value === undefined) {
+        keepScreenOn.value = false
+    }
 
     // autoLogin establishes WebSocket connection and fetches user data
     await autoLogin()
