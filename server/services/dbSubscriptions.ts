@@ -14,7 +14,10 @@ import {
     setCurrentBatchId, 
     setRaft,
     deleteRaft,
-    clearActiveRafts
+    clearActiveRafts,
+    setPushSubscription,
+    deletePushSubscription,
+    clearPushSubscriptions
 } from './state'
 
 export { 
@@ -38,6 +41,8 @@ async function startSubscriptions() {
             }
         }
     )
+
+    startPushSubscriptions()
 }
 
 function startRaftSubscription(batchId: string) {
@@ -52,6 +57,7 @@ function startRaftSubscription(batchId: string) {
 function stopSubscriptions() {
     removeSubscription('batch-subscription')
     removeSubscription('raft-subscription')
+    removeSubscription('push-subscriptions')
     closeWebSocket()
 }
 
@@ -116,9 +122,53 @@ const raftsCallbacks = {
     }
 }
 
+function startPushSubscriptions() {
+    addSubscription(
+        'push-subscriptions',
+        'pushSubscriptions',
+        (msg) => dispatcher(msg, pushSubscriptionsCallbacks)
+    )
+}
+
+const pushSubscriptionsCallbacks = {
+    init(message: any) {
+        clearPushSubscriptions()
+        message.data?.forEach(setPushSubscription)
+        console.log(`[Subscriptions] Loaded ${serverState.pushSubscriptions.size} push subscriptions`)
+    },
+    create(message: any) {
+        message.data?.forEach(setPushSubscription)
+    },
+    update(message: any) {
+        message.data?.forEach(setPushSubscription)
+    },
+    delete(message: any) {
+        if (typeof message.data === 'string') {
+            deletePushSubscription(message.data)
+        } else {
+            message.data?.forEach((id: string) => deletePushSubscription(id))
+        }
+    }
+}
+
 type Callbacks = {
     init: Function
     create: Function
     update: Function
     delete: Function
 }
+
+/*
+c5t_realWorld : startPushSubscriptions()
+Push subscriptions are synced from Directus via WebSocket. We keep them in memory
+(serverState.pushSubscriptions) so when a checkpoint event triggers, we can immediately
+broadcast the notification to all subscribed clients without DB queries.
+
+c5t_specs : pushSubscriptionsCallbacks
+init - load all existing subscriptions from Directus on server startup
+create - when client subscribes via Directus (adds new device/user combo)
+update - when a subscription is modified (user data changes, endpoint updates)
+delete - when client unsubscribes (removes the subscription entry)
+
+On update, we replace (not merge) because user data or auth might have changed.
+*/

@@ -11,12 +11,14 @@
     },
     "dependencies": {
         "vite-plugin-pwa": "^0.19.8",
-        "vue": "^3.4.21"
+        "vue": "^3.4.21",
+        "web-push": "^3.6.7"
     },
     "devDependencies": {
-        "vite": "^5.2.10",
+        "@types/web-push": "^3.6.4",
         "@vitejs/plugin-vue": "^5.0.4",
-        "nitropack": "^2.13.1"
+        "nitropack": "^2.13.1",
+        "vite": "^5.2.10"
     },
     "overrides": {
         "esbuild": "^0.25.0",

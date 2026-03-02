@@ -1,7 +1,7 @@
 <script setup>
-import { defineProps } from 'vue'
 import Icon from '../../Icon/Main.vue'
 import User from '../../Overlay/Modal/User.vue'
+import NotificationsToggle from './NotificationsToggle.vue'
 import { currentBatch, closeBatch } from '../../../composables/testProcess'
 import { useUser } from '../../../composables/useUser'
 import { useAuth } from '../../../composables/useAuth'
@@ -52,13 +52,8 @@ const handleLogout = async () => {
                 </div>
             </button>
 
-            <!-- Batch Info -->
-            <div class="menuSection">
-                <p class="menuLabel">Batch ID</p>
-                <p class="menuValue" style="font-family: monospace; font-size: 0.85em;">
-                    {{ currentBatch.id || 'None' }}
-                </p>
-            </div>
+            <!-- Notifications Toggle -->
+            <NotificationsToggle />
 
             <!-- Close Batch Button -->
             <button 

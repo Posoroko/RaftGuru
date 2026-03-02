@@ -4,6 +4,7 @@ import { dbGet } from './fetch'
 export { useUser }
 
 const userState = ref<{
+    id?: string
     isLoggedIn: boolean
     first_name: string
     avatar: string
@@ -25,6 +26,7 @@ const useUser = () => {
             if (data) {
                 userState.value = {
                     ...userState.value,
+                    id: data.id,
                     isLoggedIn: true,
                     first_name: data.first_name || '',
                     avatar: data.avatar || '',
