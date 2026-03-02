@@ -8,7 +8,7 @@ import { useStorage } from './composables/useStorage'
 import { useWakeLock } from './composables/useWakeLock'
 
 const { value: keepScreenOn } = useStorage('keepScreenOn', false)
-const { requestWakeLock, releaseWakeLock } = useWakeLock()
+const { requestWakeLock, releaseWakeLock, isActive, status } = useWakeLock()
 
 onMounted(() => {
     useAppInit()
@@ -35,6 +35,20 @@ watch(keepScreenOn, async (newVal) => {
             relative
         "
     >
+        <!-- Wake Lock Status Indicator -->
+        <div 
+            v-if="keepScreenOn"
+            class="wakeLockIndicator"
+            :class="status"
+        >
+            <span v-if="status === 'active'" class="indicator-dot active"></span>
+            <span v-else-if="status === 'error'" class="indicator-dot error"></span>
+            <span v-else class="indicator-dot idle"></span>
+            <span class="indicator-text">
+                {{ status === 'active' ? '🔒 Screen On' : status === 'error' ? '❌ Failed' : '⏳ Loading...' }}
+            </span>
+        </div>
+
         <TopBar />
 
          <GridMain />
@@ -46,6 +60,64 @@ watch(keepScreenOn, async (newVal) => {
 <style>
 #app {
     background-color: var(--color-bg);
+}
+
+.wakeLockIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    border-bottom: 1px solid rgba(100, 100, 100, 0.2);
+}
+
+.wakeLockIndicator.active {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.wakeLockIndicator.error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.wakeLockIndicator.idle {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.indicator-dot.active {
+    background-color: #4caf50;
+}
+
+.indicator-dot.error {
+    background-color: #f44336;
+    animation: none;
+}
+
+.indicator-dot.idle {
+    background-color: #ff9800;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.indicator-text {
+    font-weight: 500;
 }
 </style>
 
