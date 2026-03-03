@@ -11,14 +11,14 @@ export {
 
 function initPush() {
     const config = useRuntimeConfig()
-    const { public: vapidPublic, private: vapidPrivate, email } = config.vapid
+    const { vapidPublicKey, vapidPrivateKey, vapidEmail } = config
 
-    if (!vapidPrivate) {
+    if (!vapidPrivateKey) {
         console.error('[push] ✗ VAPID_PRIVATE not set in .env')
         return
     }
 
-    webpush.setVapidDetails(email, vapidPublic, vapidPrivate)
+    webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey)
     console.log('[push] ✓ VAPID keys configured')
 }
 
