@@ -9,11 +9,13 @@ const userState = ref<{
     first_name: string
     avatar: string
     email: string
+    pushSubscriptions: Array<any>
 }>({
     isLoggedIn: false,
     first_name: '',
     avatar: '',
-    email: ''
+    email: '',
+    pushSubscriptions: []
 })
 
 const useUser = () => {
@@ -30,7 +32,8 @@ const useUser = () => {
                     isLoggedIn: true,
                     first_name: data.first_name || '',
                     avatar: data.avatar || '',
-                    email: data.email
+                    email: data.email,
+                    pushSubscriptions: data.pushSubscriptions || []
                 }
             }
 

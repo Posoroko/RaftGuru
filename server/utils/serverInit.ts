@@ -5,6 +5,7 @@
 
 import { serverState } from '../services/state'
 import { startSubscriptions, stopSubscriptions } from '../services/dbSubscriptions'
+import { initPush } from '../services/push'
 
 export { initializeServer, shutdownServer }
 
@@ -12,6 +13,7 @@ async function initializeServer() {
     console.log('Initializing server...')
     
     try {
+        initPush()
         await startSubscriptions()
         serverState.isInitialized = true
         console.log('Server initialization complete')

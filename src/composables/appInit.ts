@@ -10,6 +10,9 @@ export const useAppInit = async () => {
 
     if (appState.value.initialized) return
 
+    // Register Service Worker for PWA and push notifications
+    registerServiceWorker()
+
     // autoLogin establishes WebSocket connection and fetches user data
     await autoLogin()
 
@@ -40,4 +43,29 @@ function initEventListeners() {
         console.log('[appInit] App became visible - refreshing data')
         location.reload()
     })
+}
+
+// ============================================================================
+// Register Service Worker for PWA and Push Notifications
+// ============================================================================
+function registerServiceWorker() {
+    // Check if browser supports Service Workers
+    if (!navigator.serviceWorker) {
+        console.warn('[appInit] Service Worker not supported in this browser')
+        return
+    }
+
+    // Register the sw.js file from public folder
+    navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+            console.log('[appInit] ✓ Service Worker registered')
+            
+            // Check for updates every 30 minutes
+            setInterval(() => {
+                registration.update()
+            }, 30 * 60 * 1000)
+        })
+        .catch((err) => {
+            console.error('[appInit] ✗ Service Worker registration failed:', err.message)
+        })
 }

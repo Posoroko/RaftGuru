@@ -1,10 +1,10 @@
 {
-    "name": "raftguru",
+    "name": "testguru",
     "version": "1.0.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "dev:server": "nitro dev",
+        "dev:server": "nitro dev --port 3001",
         "build": "vite build && nitro build",
         "preview": "vite preview",
         "start": "node .output/server/index.mjs"

@@ -1,8 +1,7 @@
 import { defineNitroConfig } from 'nitropack'
 
 export default defineNitroConfig({
-    srcDir: 'server',
-    rootDir: '.',
+    srcDir: './server',
     
     // Build output directory
     buildDir: '.output',
@@ -19,6 +18,12 @@ export default defineNitroConfig({
     
     // Environment variables
     runtimeConfig: {
+        serverAccessToken: process.env.NITRO_SERVER_ACCESS_TOKEN || '',
+        vapid: {
+            public: 'BIdAR4wnsPoS3I-t9BF4gch698R8JoyIK_CyNcT89q9aLrR4mE_A2V_R26k8_MPtzoJxomotDlBIMJYtzm6hxqc',
+            private: process.env.VAPID_PRIVATE || '',
+            email: 'mailto:eric@posoroko.com'
+        },
         public: {
             apiBase: process.env.DIRECTUS_URL || 'http://localhost:3000'
         }

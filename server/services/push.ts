@@ -3,10 +3,29 @@ import webpush from 'web-push'
 import { serverState } from './state'
 import { PushSubscription } from '../types'
 
-export { handleCheckpointReachedNotification }
+export { 
+    handleCheckpointReachedNotification,
+    handleNewRaftNotification,
+    initPush 
+}
+
+function initPush() {
+    const config = useRuntimeConfig()
+    const { public: vapidPublic, private: vapidPrivate, email } = config.vapid
+
+    if (!vapidPrivate) {
+        console.error('[push] ✗ VAPID_PRIVATE not set in .env')
+        return
+    }
+
+    webpush.setVapidDetails(email, vapidPublic, vapidPrivate)
+    console.log('[push] ✓ VAPID keys configured')
+}
 
 // c5t_specs
-async function handleCheckpointReachedNotification(checkpointData: CheckpointEvent) {
+async function handleCheckpointReachedNotification(
+    checkpointData: CheckpointEvent
+) {
     const subscriptions = Array.from(serverState.pushSubscriptions.values())
 
     if (subscriptions.length === 0) {
@@ -51,6 +70,50 @@ function createCheckpointReachedNotification(
     }
 }
 
+// c5t_specs_02
+async function handleNewRaftNotification(raftData: NewRaftEvent) {
+    const subscriptions = Array.from(serverState.pushSubscriptions.values())
+
+    if (subscriptions.length === 0) {
+        console.log('[push] No subscriptions to notify')
+        return
+    }
+
+    console.log(`[push] Sending new raft notification to ${subscriptions.length} subscribers`)
+
+    const promises = subscriptions.map(async sub => {
+        const payload = createNewRaftNotification(sub, raftData)
+        await sendNotification(payload)
+    })
+
+    const results = await Promise.allSettled(promises)
+
+    results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+            console.error(`[push] Failed to notify subscription ${index}:`, result.reason)
+        }
+    })
+}
+
+function createNewRaftNotification(
+    sub: PushSubscription,
+    data: NewRaftEvent
+): WebPushPayload {
+    return {
+        endpoint: sub.endpoint,
+        keys: {
+            auth: sub.auth,
+            p256dh: sub.p256dh
+        },
+        data: {
+            title: 'New Raft Added',
+            body: `Raft started — 1st pressure at ${data.time_pressure1}`,
+            badge: '/icon-192.png',
+            tag: `new-raft-${data.id}`
+        }
+    }
+}
+
 async function sendNotification(payload: WebPushPayload) {
     await webpush.sendNotification(
         {
@@ -65,6 +128,12 @@ interface CheckpointEvent {
     pressureLevel: 1 | 2
     tileRef: string
     timestamp: string
+}
+
+interface NewRaftEvent {
+    id: string
+    time_inflation: string
+    time_pressure1: string
 }
 
 interface WebPushPayload {
@@ -82,6 +151,11 @@ interface WebPushPayload {
 }
 
 /*
+c5t_specs_02 : handleNewRaftNotification
+Sends a push notification to all subscribers when a new raft is created.
+Used for testing the push flow — create a raft item in the app and
+all subscribed devices receive a notification immediately.
+
 c5t_howTo : handleCheckpointReachedNotification
 Entry point when a checkpoint is detected. Gets all subscriptions, creates and sends notifications.
 

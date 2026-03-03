@@ -8,7 +8,7 @@ import {
     addSubscription, 
     removeSubscription, 
     closeWebSocket 
-} from '../plugins/websocket'
+} from './websocket'
 import { 
     serverState, 
     setCurrentBatchId, 
@@ -19,6 +19,7 @@ import {
     deletePushSubscription,
     clearPushSubscriptions
 } from './state'
+import { handleNewRaftNotification } from './push'
 
 export { 
     startSubscriptions, 
@@ -108,7 +109,11 @@ const raftsCallbacks = {
         message.data?.forEach(setRaft)
     },
     create(message: any) {
-        message.data?.forEach(setRaft)
+        message.data?.forEach((raft: any) => {
+            setRaft(raft)
+            console.log('new raft created')
+            handleNewRaftNotification(raft)
+        })
     },
     update(message: any) {
         message.data?.forEach(setRaft)

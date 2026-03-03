@@ -2,95 +2,63 @@
 import Icon from '@/components/Icon/Main.vue'
 import { useUser } from '@/composables/useUser'
 import { getSubscriptionFromBrowser } from '@/composables/browser'
-import { dbGet, dbPost, dbDelete } from '@/composables/fetch'
-import { ref, onMounted } from 'vue'
+import { dbPost, dbDelete } from '@/composables/fetch'
+import { ref } from 'vue'
 
-const { userState } = useUser()
-
-const subscriptionId = ref<string | null>(null)
+const { userState, getUserData } = useUser()
 const isPending = ref(false)
 
-// c5t_howTo
-async function loadNotifications() {
-    try {
-        isPending.value = true
-        const result = await dbGet({
-            endpoint: '/items/pushSubscriptions',
-            query: {
-                filter: { 
-                    user: { 
-                        _eq: userState.value.id
-                    }
-                },
-                fields: 'id'
-            }
-        })
-        
-        if (!result || !Array.isArray(result) || result.length === 0) {
-            console.log('[NotificationsToggle] No subscription found')
-            subscriptionId.value = null
-        } else {
-            subscriptionId.value = result[0].id
-        }
-    } catch (err) {
-        console.log('[NotificationsToggle] No subscription found')
-        subscriptionId.value = null
-    } finally {
-        isPending.value = false
-    }
+function isSubscribed() {
+    return userState.value.pushSubscriptions && userState.value.pushSubscriptions.length > 0
 }
 
-// c5t_howTo
+function getSubscriptionId() {
+    return userState.value.pushSubscriptions?.[0] || null
+}
+
+async function cancelNotifications() {
+    const subId = getSubscriptionId()
+    console.log('[NotificationsToggle] Deleting subscription:', subId)
+    await dbDelete(`/items/pushSubscriptions/${subId}`)
+    console.log('[NotificationsToggle] Subscription deleted')
+}
+
+async function activateNotifications() {
+    const subscription = await getSubscriptionFromBrowser()
+            
+    console.log('[NotificationsToggle] Saving subscription to Directus...')
+    await dbPost({
+        endpoint: '/items/pushSubscriptions',
+        body: {
+            user: userState.value.id,
+            endpoint: subscription.endpoint,
+            auth: subscription.auth,
+            p256dh: subscription.p256dh
+        }
+    })
+    console.log('[NotificationsToggle] Subscription saved')
+}
+
 async function toggleNotifications() {
     try {
         isPending.value = true
         
-        if (subscriptionId.value) {
-            // Disable: delete subscription using stored ID
-            console.log('[NotificationsToggle] Deleting subscription:', subscriptionId.value)
-            await dbDelete(
-                `/items/pushSubscriptions/${subscriptionId.value}`
-            )
-            console.log('[NotificationsToggle] Subscription deleted successfully')
-            subscriptionId.value = null
+        if (isSubscribed()) {
+            await cancelNotifications()
         } else {
-            // Enable: create subscription
-
-            const subscription = await getSubscriptionFromBrowser()
-            
-            console.log('[NotificationsToggle] Saving subscription to Directus...')
-            
-            await dbPost({
-                endpoint: '/items/pushSubscriptions',
-                body: {
-                    user: userState.value.id,
-                    endpoint: subscription.endpoint,
-                    auth: subscription.auth,
-                    p256dh: subscription.p256dh
-                }
-            })
-            
-            console.log('[NotificationsToggle] Subscription saved successfully')
-            
-            // Reload to get the new subscription ID
-            await loadNotifications()
+            await activateNotifications()
         }
+        
+        // Refresh user data to update pushSubscriptions array
+        await getUserData()
     } catch (err) {
-        console.error('[NotificationsToggle] Failed to toggle notifications:', err)
-        if (err instanceof Error) {
-            console.error('[NotificationsToggle] Error message:', err.message)
-            console.error('[NotificationsToggle] Error stack:', err.stack)
-        }
-        // Revert state on error
-        await loadNotifications()
+        console.error('[NotificationsToggle] Error toggling notifications:', err)
+        // Refresh to revert UI on error
+        await getUserData()
     } finally {
         isPending.value = false
     }
 }
-
-onMounted(() => {
-    loadNotifications()
-})
 </script>
 
 <template>
@@ -100,7 +68,7 @@ onMounted(() => {
         :disabled="isPending"
     >
         <icon size="md">
-            {{ subscriptionId ? 'check_box' : 'check_box_outline_blank' }}
+            {{ isSubscribed() ? 'check_box' : 'check_box_outline_blank' }}
         </icon>
         <span>Notifications</span>
     </button>
@@ -133,16 +101,17 @@ onMounted(() => {
 </style>
 
 /*
-c5t_howTo : NotificationsToggle
-Standalone component that manages push notification subscriptions. Loads current subscription
-status on mount and provides toggle functionality to enable/disable notifications.
+c5t_realWorld : Notification Subscriptions
+Technician can toggle push notifications on/off. When enabled, browser subscribes to receive
+reminders about raft measurement deadlines. Subscription details (endpoint, keys) are stored
+in Directus so server knows where to send push notifications.
 
-Usage:
-    import NotificationsToggle from '@/components/TopBar/Menu/NotificationsToggle.vue'
-    <NotificationsToggle />
+c5t_stack_01 : isSubscribed
+Checks if user has any subscriptions in their pushSubscriptions array.
+Since pushSubscriptions is a one-to-many relationship on the user record,
+it's available in userState after user login.
 
-c5t_specs : NotificationsToggle
-Queries pushSubscriptions collection to see if user has active subscription. When toggled,
-creates or deletes the subscription in Directus. Real-world: Before creating, needs to request
-browser's push subscription details (endpoint, auth, p256dh) from Service Worker registration.
+c5t_stack_02 : toggleNotifications
+Creates or deletes subscription in Directus. After change, calls getUserData() to refresh
+the user record so pushSubscriptions array is updated and UI reflects current state.
 */

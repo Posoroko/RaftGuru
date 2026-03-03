@@ -12,8 +12,10 @@ export {
 }
 
 const WS_URL = process.env.DIRECTUS_WS_URL || 'wss://db.raftguru.posoroko.com/websocket'
+const ACCESS_TOKEN = process.env.NITRO_SERVER_ACCESS_TOKEN || ''
 
 let ws: WebSocket | null = null
+let authenticated = false
 const subscriptions = new Set<string>()
 
 type MessageHandler = (msg: any) => void
@@ -38,12 +40,28 @@ function initWebSocket(): Promise<void> {
         ws = new WebSocket(WS_URL)
 
         ws.addEventListener('open', () => {
-            console.log('[Server WS] connected')
-            resolve()
+            console.log('[Server WS] connected, authenticating...')
+            ws!.send(JSON.stringify({
+                type: 'auth',
+                access_token: ACCESS_TOKEN
+            }))
         })
 
         ws.addEventListener('message', (event) => {
             const msg = JSON.parse(event.data.toString())
+
+            // Handle auth response before dispatching
+            if (msg.type === 'auth' && msg.status === 'ok') {
+                authenticated = true
+                console.log('[Server WS] ✓ authenticated')
+                resolve()
+                return
+            }
+            if (msg.type === 'auth' && msg.status === 'error') {
+                console.error('[Server WS] ✗ auth failed:', msg.error)
+                return
+            }
+
             dispatcher(msg)
         })
 
@@ -51,6 +69,7 @@ function initWebSocket(): Promise<void> {
             console.log('[Server WS] disconnected')
             ws = null
             wsReadyPromise = null
+            authenticated = false
             subscriptions.clear()
             handlers.clear()
         })
