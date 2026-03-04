@@ -155,9 +155,13 @@ function dispatcher(msg: any) {
         return
     }
 
+    console.log('[Server WS] message received:', JSON.stringify(msg).substring(0, 200))
+
     const handler = handlers.get(uid)
     if (handler) {
         handler(msg)
+    } else {
+        console.log('[Server WS] no handler for uid:', uid)
     }
 }
 

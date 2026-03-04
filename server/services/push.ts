@@ -72,6 +72,7 @@ function createCheckpointReachedNotification(
 
 // c5t_specs_02
 async function handleNewRaftNotification(raftData: NewRaftEvent) {
+    console.log("[handleNewRaftNotification] - Function called")
     const subscriptions = Array.from(serverState.pushSubscriptions.values())
 
     if (subscriptions.length === 0) {

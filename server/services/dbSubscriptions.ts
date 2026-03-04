@@ -37,8 +37,8 @@ async function startSubscriptions() {
             batchesCallbacks
         ),
         { 
-            status: { 
-                _eq: 'active' 
+            isCurrent: { 
+                _eq: true 
             }
         }
     )
@@ -66,6 +66,7 @@ function dispatcher(
     message: any,
     callbacks: Callbacks
 ) {
+    console.log('[Subscriptions] Event received:', message.event, 'uid:', message.uid)
     if (message.event === 'init') {
         callbacks.init(message)
     } else if (message.event === 'create') {
@@ -87,6 +88,7 @@ const batchesCallbacks = {
         }
     },
     create(message: any) {
+        console.log('batch created')
         const batch = message.data?.[0]
         if (batch) {
             clearActiveRafts()
@@ -95,9 +97,11 @@ const batchesCallbacks = {
         }
     },
     update(message: any) {
+        console.log('batch update')
         // probably not much to do server side
     },
     delete(message: any) {
+        console.log('batch delete')
         removeSubscription('raft-subscription')
         clearActiveRafts()
         setCurrentBatchId(null)
@@ -111,7 +115,7 @@ const raftsCallbacks = {
     create(message: any) {
         message.data?.forEach((raft: any) => {
             setRaft(raft)
-            console.log('new raft created')
+            console.log('[Subscriptions] New raft created:', raft.id)
             handleNewRaftNotification(raft)
         })
     },
@@ -131,7 +135,9 @@ function startPushSubscriptions() {
     addSubscription(
         'push-subscriptions',
         'pushSubscriptions',
-        (msg) => dispatcher(msg, pushSubscriptionsCallbacks)
+        (msg) => dispatcher(msg, pushSubscriptionsCallbacks),
+        undefined,
+        ['id', 'endpoint', 'auth', 'p256dh', 'user']
     )
 }
 
@@ -143,11 +149,13 @@ const pushSubscriptionsCallbacks = {
     },
     create(message: any) {
         message.data?.forEach(setPushSubscription)
+        console.log('push sub created')
     },
     update(message: any) {
         message.data?.forEach(setPushSubscription)
     },
     delete(message: any) {
+        console.log('push sub delete')
         if (typeof message.data === 'string') {
             deletePushSubscription(message.data)
         } else {
