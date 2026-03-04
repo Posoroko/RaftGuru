@@ -1,25 +1,39 @@
 /**
  * SPA catch-all route
- * Serves index.html for all non-API routes so Vue Router handles client-side routing
+ * Serves index.html for all non-API routes
  */
 
 import { join } from 'path'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 
 let indexHtml: string | null = null
 
 export default defineEventHandler((event) => {
-    // Skip API routes (handled by /server/api/)
+    // Skip API routes
     if (event.path?.startsWith('/api/')) {
         return
     }
 
     // Load index.html once and cache it
     if (!indexHtml) {
-        try {
-            const publicDir = join(process.cwd(), '.output', 'public')
-            indexHtml = readFileSync(join(publicDir, 'index.html'), 'utf-8')
-        } catch {
+        const candidates = [
+            join(process.cwd(), '.output', 'public', 'index.html'),
+            join(process.cwd(), 'dist', 'index.html'),
+            join(process.cwd(), 'public', 'index.html'),
+            join(process.cwd(), 'index.html'),
+        ]
+
+        for (const path of candidates) {
+            if (existsSync(path)) {
+                console.log('[SPA] Serving index.html from:', path)
+                indexHtml = readFileSync(path, 'utf-8')
+                break
+            }
+        }
+
+        if (!indexHtml) {
+            console.error('[SPA] index.html not found. Tried:', candidates)
+            console.error('[SPA] cwd:', process.cwd())
             throw createError({ statusCode: 500, message: 'index.html not found' })
         }
     }
