@@ -22,7 +22,7 @@ import { ErrorParser } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/W
 import { Youch } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/youch/build/index.js';
 import { SourceMapConsumer } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/nitropack/node_modules/source-map/source-map.js';
 import webpush from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/web-push/src/index.js';
-import { promises, existsSync, readFileSync } from 'node:fs';
+import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/pathe/dist/index.mjs';
 
@@ -1275,7 +1275,22 @@ const plugins = [
   _lcPaaU_XN_JO1ENhIroM8VtEmyOJkFnISoKu88uQzps
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"2fca3-kAahjtDzuThJGH0b+TQ0buvseLg\"",
+    "mtime": "2026-03-04T18:03:33.490Z",
+    "size": 195747,
+    "path": "index.mjs.map"
+  },
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"d0bb-cUB+YgYa/YadJ0RtualfbZ+jeXs\"",
+    "mtime": "2026-03-04T18:03:33.490Z",
+    "size": 53435,
+    "path": "index.mjs"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1365,12 +1380,10 @@ const _xSvZT7 = eventHandler((event) => {
 });
 
 const _lazy_cupjB7 = () => Promise.resolve().then(function () { return hello; });
-const _lazy_ZmQbHq = () => Promise.resolve().then(function () { return _____$1; });
 
 const handlers = [
   { route: '', handler: _xSvZT7, lazy: false, middleware: true, method: undefined },
-  { route: '/api/hello', handler: _lazy_cupjB7, lazy: true, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_ZmQbHq, lazy: true, middleware: false, method: undefined }
+  { route: '/api/hello', handler: _lazy_cupjB7, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -1639,43 +1652,5 @@ async function shutdown() {
 
 const hello = /*#__PURE__*/Object.freeze({
   __proto__: null
-});
-
-let indexHtml = null;
-const _____ = defineEventHandler((event) => {
-  const path = event.path || "";
-  if (path.startsWith("/api/")) {
-    return;
-  }
-  if (path.startsWith("/assets/") || path.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|ttf|json|webmanifest|map)$/)) {
-    return;
-  }
-  if (!indexHtml) {
-    const candidates = [
-      join(process.cwd(), ".output", "public", "index.html"),
-      join(process.cwd(), "dist", "index.html"),
-      join(process.cwd(), "public", "index.html"),
-      join(process.cwd(), "index.html")
-    ];
-    for (const path2 of candidates) {
-      if (existsSync(path2)) {
-        console.log("[SPA] Serving index.html from:", path2);
-        indexHtml = readFileSync(path2, "utf-8");
-        break;
-      }
-    }
-    if (!indexHtml) {
-      console.error("[SPA] index.html not found. Tried:", candidates);
-      console.error("[SPA] cwd:", process.cwd());
-      throw createError({ statusCode: 500, message: "index.html not found" });
-    }
-  }
-  setResponseHeader(event, "Content-Type", "text/html");
-  return indexHtml;
-});
-
-const _____$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  default: _____
 });
 //# sourceMappingURL=index.mjs.map
