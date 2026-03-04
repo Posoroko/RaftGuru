@@ -1278,16 +1278,16 @@ const plugins = [
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"d261-3jq9RutKjwO23nZC5nvzOUUGKj8\"",
-    "mtime": "2026-03-04T17:38:11.588Z",
-    "size": 53857,
+    "etag": "\"d3f7-wKg+RPEMuoFYc/8g4sHmDCc2VuE\"",
+    "mtime": "2026-03-04T17:40:56.781Z",
+    "size": 54263,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"301d5-feRFzzdCBlpZMJm8PLHK6wkfQMs\"",
-    "mtime": "2026-03-04T17:38:11.590Z",
-    "size": 197077,
+    "etag": "\"301e4-obrRY2we5Z2XO9US5eEFDOCeMhQ\"",
+    "mtime": "2026-03-04T17:40:56.781Z",
+    "size": 197092,
     "path": "index.mjs.map"
   }
 };
@@ -1379,24 +1379,11 @@ const _xSvZT7 = eventHandler((event) => {
   return readAsset(id);
 });
 
-const _5Vlf44 = defineEventHandler(async (event) => {
-  const path = event.path || "";
-  if (path.startsWith("/api")) {
-    return;
-  }
-  if (path.includes(".")) {
-    return;
-  }
-  const publicDir = join(dirname(fileURLToPath(globalThis._importMeta_.url)), "..", "public");
-  return sendFile(event, join(publicDir, "index.html"));
-});
-
 const _lazy_cupjB7 = () => Promise.resolve().then(function () { return hello; });
 const _lazy_ZmQbHq = () => Promise.resolve().then(function () { return _____$1; });
 
 const handlers = [
   { route: '', handler: _xSvZT7, lazy: false, middleware: true, method: undefined },
-  { route: '', handler: _5Vlf44, lazy: false, middleware: true, method: undefined },
   { route: '/api/hello', handler: _lazy_cupjB7, lazy: true, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_ZmQbHq, lazy: true, middleware: false, method: undefined }
 ];
