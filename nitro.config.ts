@@ -2,19 +2,15 @@ import { defineNitroConfig } from 'nitropack'
 
 export default defineNitroConfig({
     srcDir: './server',
+    preset: 'node-server',
     
-    // Build output directory
-    buildDir: '.output',
-    
-    // Serve static files from dist/ (Vue build)
-    public: {
-        dir: './dist',
-        maxAge: 60 * 60 * 24 * 365 // 1 year for assets
-    },
-    
-    // Server configuration
-    dev: true,
-    nitroErrorHandler: true,
+    // Serve Vue build output as static files at root
+    publicAssets: [
+        {
+            dir: '../dist',
+            baseURL: '/',
+        }
+    ],
     
     // Environment variables
     runtimeConfig: {

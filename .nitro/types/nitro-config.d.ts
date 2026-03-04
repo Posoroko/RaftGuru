@@ -10,7 +10,13 @@ type UserAppConfig = Defu<{}, []>
 declare module "nitropack/types" {
   interface AppConfig extends UserAppConfig {}
   interface NitroRuntimeConfig {
+   serverAccessToken: string,
 
+   vapidPublicKey: string,
+
+   vapidPrivateKey: string,
+
+   vapidEmail: string,
   }
 }
 export {}

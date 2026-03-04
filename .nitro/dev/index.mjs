@@ -21,11 +21,12 @@ import consola from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Pro
 import { ErrorParser } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/youch-core/build/index.js';
 import { Youch } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/youch/build/index.js';
 import { SourceMapConsumer } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/nitropack/node_modules/source-map/source-map.js';
-import { promises } from 'node:fs';
+import webpush from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/web-push/src/index.js';
+import { promises, existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/ericp/Documents/Studio%20Posoroko/Web%20Projects/RaftGuru/node_modules/pathe/dist/index.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/assets"}];
+const serverAssets = [{"baseName":"server","dir":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -38,7 +39,7 @@ const storage = createStorage({});
 storage.mount('/assets', assets$1);
 
 storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru"}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru"}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/server"}));
 storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/.nitro"}));
 storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/.nitro/cache"}));
 storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Users/ericp/Documents/Studio Posoroko/Web Projects/RaftGuru/.data/kv"}));
@@ -615,7 +616,11 @@ const _inlineRuntimeConfig = {
   },
   "nitro": {
     "routeRules": {}
-  }
+  },
+  "serverAccessToken": "T_yvvxlIliKPcmtiZQgpqyIbUapRPFAs",
+  "vapidPublicKey": "BIdAR4wnsPoS3I-t9BF4gch698R8JoyIK_CyNcT89q9aLrR4mE_A2V_R26k8_MPtzoJxomotDlBIMJYtzm6hxqc",
+  "vapidPrivateKey": "wl_BGfp5IkoL10I1sXIeGx7T7Q8asiBqoQ2Q4WJw0Lo",
+  "vapidEmail": "mailto:eric@posoroko.com"
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -896,11 +901,396 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const serverState = {
+  currentBatchId: null,
+  activeRafts: /* @__PURE__ */ new Map(),
+  pushSubscriptions: /* @__PURE__ */ new Map()
+};
+function setCurrentBatchId(batchId) {
+  serverState.currentBatchId = batchId;
+  if (!batchId) {
+    serverState.activeRafts.clear();
+  }
+}
+function setRaft(raft) {
+  serverState.activeRafts.set(
+    raft.id,
+    raft
+  );
+}
+function deleteRaft(raftId) {
+  serverState.activeRafts.delete(raftId);
+}
+function clearActiveRafts() {
+  serverState.activeRafts.clear();
+}
+function setPushSubscription(sub) {
+  serverState.pushSubscriptions.set(sub.id, sub);
+}
+function deletePushSubscription(subId) {
+  serverState.pushSubscriptions.delete(subId);
+}
+function clearPushSubscriptions() {
+  serverState.pushSubscriptions.clear();
+}
+
+const WS_URL = process.env.DIRECTUS_WS_URL || "wss://db.raftguru.posoroko.com/websocket";
+const ACCESS_TOKEN = process.env.NITRO_SERVER_ACCESS_TOKEN || "";
+let ws = null;
+const subscriptions = /* @__PURE__ */ new Set();
+const handlers$1 = /* @__PURE__ */ new Map();
+let wsReadyPromise = null;
+function initWebSocket() {
+  if ((ws == null ? void 0 : ws.readyState) === WebSocket.OPEN) {
+    console.log("[Server WS] already connected");
+    return Promise.resolve();
+  }
+  if (wsReadyPromise) {
+    return wsReadyPromise;
+  }
+  wsReadyPromise = new Promise((resolve) => {
+    ws = new WebSocket(WS_URL);
+    ws.addEventListener("open", () => {
+      console.log("[Server WS] connected, authenticating...");
+      ws.send(JSON.stringify({
+        type: "auth",
+        access_token: ACCESS_TOKEN
+      }));
+    });
+    ws.addEventListener("message", (event) => {
+      const msg = JSON.parse(event.data.toString());
+      if (msg.type === "auth" && msg.status === "ok") {
+        console.log("[Server WS] \u2713 authenticated");
+        resolve();
+        return;
+      }
+      if (msg.type === "auth" && msg.status === "error") {
+        console.error("[Server WS] \u2717 auth failed:", msg.error);
+        return;
+      }
+      dispatcher$1(msg);
+    });
+    ws.addEventListener("close", () => {
+      console.log("[Server WS] disconnected");
+      ws = null;
+      wsReadyPromise = null;
+      subscriptions.clear();
+      handlers$1.clear();
+    });
+    ws.addEventListener("error", (err) => {
+      console.error("[Server WS] error:", err);
+    });
+  });
+  return wsReadyPromise;
+}
+function addSubscription(uid, collection, handler, filter, fields) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    console.error("[Server WS] not connected");
+    return;
+  }
+  if (subscriptions.has(uid)) {
+    console.log(`[Server WS] already subscribed to ${uid}`);
+    return;
+  }
+  subscriptions.add(uid);
+  handlers$1.set(uid, handler);
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    collection,
+    query: {
+      ...filter && { filter },
+      ...fields && { fields }
+    },
+    uid
+  }));
+  console.log(`[Server WS] subscribed to ${uid}`);
+}
+function removeSubscription(uid) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    console.error("[Server WS] not connected");
+    return;
+  }
+  if (!subscriptions.has(uid)) {
+    return;
+  }
+  subscriptions.delete(uid);
+  handlers$1.delete(uid);
+  ws.send(JSON.stringify({
+    type: "unsubscribe",
+    uid
+  }));
+  console.log(`[Server WS] unsubscribed from ${uid}`);
+}
+function dispatcher$1(msg) {
+  const { uid, type } = msg;
+  if (type === "ping") {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "pong" }));
+    }
+    return;
+  }
+  console.log("[Server WS] message received:", JSON.stringify(msg).substring(0, 200));
+  const handler = handlers$1.get(uid);
+  if (handler) {
+    handler(msg);
+  } else {
+    console.log("[Server WS] no handler for uid:", uid);
+  }
+}
+function closeWebSocket() {
+  if (ws) {
+    ws.close();
+    ws = null;
+    subscriptions.clear();
+    handlers$1.clear();
+  }
+  console.log("[Server WS] closed");
+}
+
+function initPush() {
+  const config = useRuntimeConfig();
+  const { vapidPublicKey, vapidPrivateKey, vapidEmail } = config;
+  if (!vapidPrivateKey) {
+    console.error("[push] \u2717 VAPID_PRIVATE not set in .env");
+    return;
+  }
+  webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
+  console.log("[push] \u2713 VAPID keys configured");
+}
+async function handleNewRaftNotification(raftData) {
+  console.log("[handleNewRaftNotification] - Function called");
+  const subscriptions = Array.from(serverState.pushSubscriptions.values());
+  if (subscriptions.length === 0) {
+    console.log("[push] No subscriptions to notify");
+    return;
+  }
+  console.log(`[push] Sending new raft notification to ${subscriptions.length} subscribers`);
+  const promises = subscriptions.map(async (sub) => {
+    const payload = createNewRaftNotification(sub, raftData);
+    await sendNotification(payload);
+  });
+  const results = await Promise.allSettled(promises);
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      console.error(`[push] Failed to notify subscription ${index}:`, result.reason);
+    }
+  });
+}
+function createNewRaftNotification(sub, data) {
+  return {
+    endpoint: sub.endpoint,
+    keys: {
+      auth: sub.auth,
+      p256dh: sub.p256dh
+    },
+    data: {
+      title: "New Raft Added",
+      body: `Raft started \u2014 1st pressure at ${data.time_pressure1}`,
+      badge: "/icon-192.png",
+      tag: `new-raft-${data.id}`
+    }
+  };
+}
+async function sendNotification(payload) {
+  await webpush.sendNotification(
+    {
+      endpoint: payload.endpoint,
+      keys: payload.keys
+    },
+    JSON.stringify(payload.data)
+  );
+}
+
+async function startSubscriptions() {
+  await initWebSocket();
+  addSubscription(
+    "batch-subscription",
+    "batches",
+    (msg) => dispatcher(
+      msg,
+      batchesCallbacks
+    ),
+    {
+      isCurrent: {
+        _eq: true
+      }
+    }
+  );
+  startPushSubscriptions();
+}
+function startRaftSubscription(batchId) {
+  addSubscription(
+    "raft-subscription",
+    "rafts",
+    (msg) => dispatcher(msg, raftsCallbacks),
+    { batch: { _eq: batchId } }
+  );
+}
+function stopSubscriptions() {
+  removeSubscription("batch-subscription");
+  removeSubscription("raft-subscription");
+  removeSubscription("push-subscriptions");
+  closeWebSocket();
+}
+function dispatcher(message, callbacks) {
+  console.log("[Subscriptions] Event received:", message.event, "uid:", message.uid);
+  if (message.event === "init") {
+    callbacks.init(message);
+  } else if (message.event === "create") {
+    callbacks.create(message);
+  } else if (message.event === "delete") {
+    callbacks.delete(message);
+  } else if (message.event === "update") {
+    callbacks.update(message);
+  }
+}
+const batchesCallbacks = {
+  init(message) {
+    const batches = message.data;
+    if ((batches == null ? void 0 : batches.length) > 0) {
+      clearActiveRafts();
+      setCurrentBatchId(batches[0].id);
+      startRaftSubscription(batches[0].id);
+    }
+  },
+  create(message) {
+    var _a;
+    console.log("batch created");
+    const batch = (_a = message.data) == null ? void 0 : _a[0];
+    if (batch) {
+      clearActiveRafts();
+      setCurrentBatchId(batch.id);
+      startRaftSubscription(batch.id);
+    }
+  },
+  update(message) {
+    console.log("batch update");
+  },
+  delete(message) {
+    console.log("batch delete");
+    removeSubscription("raft-subscription");
+    clearActiveRafts();
+    setCurrentBatchId(null);
+  }
+};
+const raftsCallbacks = {
+  init(message) {
+    var _a;
+    (_a = message.data) == null ? void 0 : _a.forEach(setRaft);
+  },
+  create(message) {
+    var _a;
+    (_a = message.data) == null ? void 0 : _a.forEach((raft) => {
+      setRaft(raft);
+      console.log("[Subscriptions] New raft created:", raft.id);
+      handleNewRaftNotification(raft);
+    });
+  },
+  update(message) {
+    var _a;
+    (_a = message.data) == null ? void 0 : _a.forEach(setRaft);
+  },
+  delete(message) {
+    var _a;
+    if (!serverState.currentBatchId) {
+      clearActiveRafts();
+      return;
+    }
+    (_a = message.data) == null ? void 0 : _a.forEach((id) => deleteRaft(id));
+  }
+};
+function startPushSubscriptions() {
+  addSubscription(
+    "push-subscriptions",
+    "pushSubscriptions",
+    (msg) => dispatcher(msg, pushSubscriptionsCallbacks),
+    void 0,
+    ["id", "endpoint", "auth", "p256dh", "user"]
+  );
+}
+const pushSubscriptionsCallbacks = {
+  init(message) {
+    var _a;
+    clearPushSubscriptions();
+    (_a = message.data) == null ? void 0 : _a.forEach(setPushSubscription);
+    console.log(`[Subscriptions] Loaded ${serverState.pushSubscriptions.size} push subscriptions`);
+  },
+  create(message) {
+    var _a;
+    (_a = message.data) == null ? void 0 : _a.forEach(setPushSubscription);
+    console.log("push sub created");
+  },
+  update(message) {
+    var _a;
+    (_a = message.data) == null ? void 0 : _a.forEach(setPushSubscription);
+  },
+  delete(message) {
+    var _a;
+    console.log("push sub delete");
+    if (typeof message.data === "string") {
+      deletePushSubscription(message.data);
+    } else {
+      (_a = message.data) == null ? void 0 : _a.forEach((id) => deletePushSubscription(id));
+    }
+  }
+};
+
+async function initializeServer() {
+  console.log("Initializing server...");
+  try {
+    initPush();
+    await startSubscriptions();
+    serverState.isInitialized = true;
+    console.log("Server initialization complete");
+  } catch (error) {
+    console.error("Server initialization failed:", error);
+    throw error;
+  }
+}
+async function shutdownServer() {
+  console.log("Shutting down server...");
+  try {
+    stopSubscriptions();
+    serverState.isInitialized = false;
+    console.log("Server shutdown complete");
+  } catch (error) {
+    console.error("Server shutdown failed:", error);
+  }
+}
+
+const _lcPaaU_XN_JO1ENhIroM8VtEmyOJkFnISoKu88uQzps = defineNitroPlugin(async function initPlugin(nitroApp) {
+  console.log("Nitro server starting...");
+  await initializeServer();
+  nitroApp.hooks.hook("close", async function onClose() {
+    console.log("Nitro server closing...");
+    await shutdownServer();
+  });
+});
+
 const plugins = [
-  
+  _lcPaaU_XN_JO1ENhIroM8VtEmyOJkFnISoKu88uQzps
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"d0bb-cUB+YgYa/YadJ0RtualfbZ+jeXs\"",
+    "mtime": "2026-03-04T17:28:31.115Z",
+    "size": 53435,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"2fca3-kAahjtDzuThJGH0b+TQ0buvseLg\"",
+    "mtime": "2026-03-04T17:28:31.115Z",
+    "size": 195747,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -989,8 +1379,25 @@ const _xSvZT7 = eventHandler((event) => {
   return readAsset(id);
 });
 
+const _5Vlf44 = defineEventHandler(async (event) => {
+  const path = event.path || "";
+  if (path.startsWith("/api")) {
+    return;
+  }
+  if (path.includes(".")) {
+    return;
+  }
+  return sendFile(event, join(process.cwd(), "dist", "index.html"));
+});
+
+const _lazy_cupjB7 = () => Promise.resolve().then(function () { return hello; });
+const _lazy_ZmQbHq = () => Promise.resolve().then(function () { return _____$1; });
+
 const handlers = [
-  { route: '', handler: _xSvZT7, lazy: false, middleware: true, method: undefined }
+  { route: '', handler: _xSvZT7, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _5Vlf44, lazy: false, middleware: true, method: undefined },
+  { route: '/api/hello', handler: _lazy_cupjB7, lazy: true, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_ZmQbHq, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -1256,4 +1663,46 @@ async function shutdown() {
   ]);
   parentPort?.postMessage({ event: "exit" });
 }
+
+const hello = /*#__PURE__*/Object.freeze({
+  __proto__: null
+});
+
+let indexHtml = null;
+const _____ = defineEventHandler((event) => {
+  const path = event.path || "";
+  if (path.startsWith("/api/")) {
+    return;
+  }
+  if (path.startsWith("/assets/") || path.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|ttf|json|webmanifest|map)$/)) {
+    return;
+  }
+  if (!indexHtml) {
+    const candidates = [
+      join(process.cwd(), ".output", "public", "index.html"),
+      join(process.cwd(), "dist", "index.html"),
+      join(process.cwd(), "public", "index.html"),
+      join(process.cwd(), "index.html")
+    ];
+    for (const path2 of candidates) {
+      if (existsSync(path2)) {
+        console.log("[SPA] Serving index.html from:", path2);
+        indexHtml = readFileSync(path2, "utf-8");
+        break;
+      }
+    }
+    if (!indexHtml) {
+      console.error("[SPA] index.html not found. Tried:", candidates);
+      console.error("[SPA] cwd:", process.cwd());
+      throw createError({ statusCode: 500, message: "index.html not found" });
+    }
+  }
+  setResponseHeader(event, "Content-Type", "text/html");
+  return indexHtml;
+});
+
+const _____$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: _____
+});
 //# sourceMappingURL=index.mjs.map
