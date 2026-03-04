@@ -1278,16 +1278,16 @@ const plugins = [
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"d0bb-cUB+YgYa/YadJ0RtualfbZ+jeXs\"",
-    "mtime": "2026-03-04T17:28:31.115Z",
-    "size": 53435,
+    "etag": "\"d261-3jq9RutKjwO23nZC5nvzOUUGKj8\"",
+    "mtime": "2026-03-04T17:38:11.588Z",
+    "size": 53857,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"2fca3-kAahjtDzuThJGH0b+TQ0buvseLg\"",
-    "mtime": "2026-03-04T17:28:31.115Z",
-    "size": 195747,
+    "etag": "\"301d5-feRFzzdCBlpZMJm8PLHK6wkfQMs\"",
+    "mtime": "2026-03-04T17:38:11.590Z",
+    "size": 197077,
     "path": "index.mjs.map"
   }
 };
@@ -1387,7 +1387,8 @@ const _5Vlf44 = defineEventHandler(async (event) => {
   if (path.includes(".")) {
     return;
   }
-  return sendFile(event, join(process.cwd(), "dist", "index.html"));
+  const publicDir = join(dirname(fileURLToPath(globalThis._importMeta_.url)), "..", "public");
+  return sendFile(event, join(publicDir, "index.html"));
 });
 
 const _lazy_cupjB7 = () => Promise.resolve().then(function () { return hello; });

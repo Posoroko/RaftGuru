@@ -4,7 +4,8 @@
  * so the Vue app handles routing client-side
  */
 
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
 export default defineEventHandler(async (event) => {
     const path = event.path || ''
@@ -19,6 +20,8 @@ export default defineEventHandler(async (event) => {
         return
     }
 
-    // Fallback to index.html
-    return sendFile(event, join(process.cwd(), 'dist', 'index.html'))
+    // In production, static files live in .output/public/
+    // __dirname resolves to .output/server/ so ../public/ is the right path
+    const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
+    return sendFile(event, join(publicDir, 'index.html'))
 })

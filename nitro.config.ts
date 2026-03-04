@@ -7,7 +7,7 @@ export default defineNitroConfig({
     // Serve Vue build output as static files at root
     publicAssets: [
         {
-            dir: '../dist',
+            dir: 'dist',
             baseURL: '/',
         }
     ],
