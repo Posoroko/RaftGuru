@@ -9,8 +9,16 @@ import { readFileSync, existsSync } from 'fs'
 let indexHtml: string | null = null
 
 export default defineEventHandler((event) => {
+    const path = event.path || ''
+
     // Skip API routes
-    if (event.path?.startsWith('/api/')) {
+    if (path.startsWith('/api/')) {
+        return
+    }
+
+    // Skip static file requests (assets, icons, sw, manifest, etc.)
+    if (path.startsWith('/assets/') || 
+        path.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|ttf|json|webmanifest|map)$/)) {
         return
     }
 
