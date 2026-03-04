@@ -4,14 +4,6 @@ export default defineNitroConfig({
     srcDir: './server',
     preset: 'node-server',
     
-    // Serve Vue build output as static files at root
-    publicAssets: [
-        {
-            dir: 'dist',
-            baseURL: '/',
-        }
-    ],
-    
     // Environment variables
     runtimeConfig: {
         serverAccessToken: process.env.NITRO_SERVER_ACCESS_TOKEN || '',

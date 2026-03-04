@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "vite",
         "dev:server": "nitro dev --port 3001",
-        "build": "vite build && nitro build",
+        "build": "vite build && nitro build && cp -r dist/* .output/public/",
         "preview": "vite preview",
         "start": "node .output/server/index.mjs"
     },
