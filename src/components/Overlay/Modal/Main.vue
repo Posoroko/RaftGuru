@@ -38,7 +38,8 @@ const { modalState, showModal, cancel } = useModal()
 
     <div
         v-if="
-            !currentBatch.id
+                userState.isLoggedIn 
+            &&  !currentBatch.id
         "
         class="
             allEvents
