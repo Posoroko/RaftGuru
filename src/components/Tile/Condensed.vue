@@ -6,8 +6,10 @@ import TimeParser from '@/components/Widgets/TimeParser.vue'
 const props = withDefaults(defineProps<{
     rafts: any[]
     standup?: boolean
+    raftOrientation?: 'west' | 'south' | 'east'
 }>(), {
-    standup: false
+    standup: false,
+    raftOrientation: 'south'
 })
 </script>
 
@@ -26,12 +28,17 @@ const props = withDefaults(defineProps<{
                 w100
                 flex alignCenter justifyEvenly
             "
+            :class="raftOrientation === 'west' ? 'rowReverse' : 'row'"
         >
             <template v-if="!(raft.pressure1Valid && raft.pressure2Valid)">
-                <div class="flex alignCenter gap5">
+                <div 
+                    class="flex alignCenter gap5"
+                    :class="raftOrientation === 'west' ? 'rowReverse' : 'row'"
+                >
                     <div class="raftSmall">
                         <Raft
                             :standup="standup"
+                            :raftOrientation="raftOrientation"
                         />
                     </div>
                     <div

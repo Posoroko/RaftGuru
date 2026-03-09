@@ -41,7 +41,8 @@ watch(keepScreenOn, async (newVal) => {
     <div 
         class="
             full
-            appBox
+            appBox 
+            typographyCss_FontSizePx
             flex column
             relative
         "
