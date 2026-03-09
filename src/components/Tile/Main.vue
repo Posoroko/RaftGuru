@@ -77,7 +77,7 @@ const currentTime = ref(new Date())
 onMounted(() => {
     const interval = setInterval(() => {
         currentTime.value = new Date()
-    }, 60000) // Update every minute
+    }, 10000)
     
     onBeforeUnmount(() => clearInterval(interval))
 })
