@@ -173,7 +173,6 @@ const checkpointStatus = computed(() => {
 
 <style scoped>
 .tile {
-    padding: 10px;
     outline: 1px solid rgba(255, 255, 255, 0.141);
     border-radius: 5px;
     box-shadow: 0 0 10px black;

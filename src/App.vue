@@ -42,7 +42,7 @@ watch(keepScreenOn, async (newVal) => {
         class="
             full
             appBox 
-            typographyCss_FontSizePx
+            typographyCss_FontSizeRem
             flex column
             relative
         "

@@ -17,25 +17,25 @@ const props = withDefaults(defineProps<{
         class="
             full
             rafts
-            flex alignCenter gap10 justifyCenter
+            flex alignCenter justifyCenter
         "
     >
         <div 
             v-for="raft in rafts"
             class="
-                raftCulumn
                 h100
-                flex column alignCenter justifyCenter gap10
+                flex column alignCenter justifyCenter
             "
         >
             <template v-if="!(raft.pressure1Valid && raft.pressure2Valid)">
                 <div 
                     class="
                         grow
-                        flex alignCenter justifyEvenly gap20 wrap
+                        flex alignCenter justifyEvenly  wrap
                     "
                     :class="[
-                        raftOrientation === 'west' ? 'rowReverse' : '',
+                        raftOrientation === 'east' ? 'row gap20' : '',
+                        raftOrientation === 'west' ? 'rowReverse gap20' : '',
                         raftOrientation === 'south' ? 'column' : '',
                     ]"
                 >
