@@ -1,15 +1,18 @@
-<script setup>
-const props = defineProps({
-    standup: {
-        type: Boolean,
-        default: false
-    }
+<script setup lang="ts">
+const props = withDefaults(defineProps<{
+    standup?: boolean
+    raftOrientation?: 'west' | 'south' | 'east'
+}>(), {
+    standup: false,
+    raftOrientation: 'south'
 })
+
 </script>
 
 <template>
     <div 
         class="
+            box
             relative
         "
     >
@@ -20,6 +23,7 @@ const props = defineProps({
                 relative
                 pad5
             "
+            :class="[raftOrientation]"
         >
             <div class="floor full">
 
@@ -51,20 +55,32 @@ const props = defineProps({
 </template>
 
 <style scoped>
+.box {
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.84);
+    overflow: hidden;
+}
 .raft {
     background-color: #f7d519;
     overflow: hidden;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.566);
+}
+.west {
+    rotate: 90deg;
+}
+.east {
+    rotate: -90deg;
 }
 .raft.laydown {
-    width: 32px;
+    width: 40px;
     aspect-ratio: 1;
     border-radius: 6px;
-    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.456);
+    
 }
 .raft.standup {
     width: 8px;
     height: 32px;
-    border-radius: 3px;
+    
     box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.456);
 
 }

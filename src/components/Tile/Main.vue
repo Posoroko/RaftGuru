@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { 
+    computed, 
+    ref, 
+    onMounted, 
+    onBeforeUnmount
+} from 'vue'
 import Icon from '@/components/Icon/Main.vue'
-import Raft from '@/components/Raft/Main.vue'
-import TimeParser from '@/components/Widgets/TimeParser.vue'
+import DefaultRafts from '@/components/Tile/Default.vue'
+import CondensedRafts from '@/components/Tile/Condensed.vue'
 import RaftSetupModal from '@/components/Overlay/Modal/RaftSetup.vue'
 import TileModal from '@/components/Overlay/Modal/Tile.vue'
 import { currentBatch, tiles, createTile } from '@/composables/testProcess'
 import { useModal } from '@/composables/useModal'
 
-const props = defineProps({
-    tileRef: String
+const props = withDefaults(defineProps<{
+    tileRef: string
+    raftOrientation: 'west' | 'south' | 'east'
+}>(), {
+    raftOrientation: 'south'
 })
 
 const { showModal } = useModal()
@@ -146,101 +154,19 @@ const checkpointStatus = computed(() => {
                 houseboat
             </Icon>
 
-            <div 
-                v-if="raftCount"
-                class="
-                    full
-                    rafts
-                    flex alignCenter gap10 justifyCenter
-                "
-            >
-                <div 
-                    v-for="raft in tiles[props.tileRef].rafts"
-                    class="
-                        raftCulumn
-                        h100
-                        flex column alignCenter justifyCenter gap10
-                    "
-                >
-                    <div 
-                        class="
-                            grow
-                            centered
-                        "
-                    >
-                        <Raft
-                            :standup="isStandup"
-                        />
-                    </div>
+            <CondensedRafts
+                v-if="raftCount && isStandup"
+                :rafts="tiles[props.tileRef].rafts"
+                :standup="true"
+                :raftOrientation="raftOrientation"
+            />
 
-                    <div 
-                        v-if="!raft.pressure1Valid"
-                        class="
-                            grow
-                            flex column alignCenter justifyEvenly
-                        "
-                    >
-                        <div
-                            class="
-                                flex gap5
-                            "
-                        >
-                            <Icon>speed</Icon>
-                            <span>1</span>
-                        </div>
-
-                        <div
-                             
-                            class="time textXl fontWeightBold"
-                        >
-                            <TimeParser
-                                :timestamp="raft.time_pressure1"
-                                flashing
-                                class="textXl fontWeightBold"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        v-if="raft.pressure1Valid && !raft.pressure2Valid"
-                        class="
-                            grow 
-                            flex column alignCenter justifyEvenly
-                        "
-                    >
-                        <div
-                            class="
-                                flex gap5
-                            "
-                        >
-                            <Icon>speed</Icon>
-                            <span>2</span>
-                        </div>
-
-                        <div class="time">
-                            <TimeParser
-                                :timestamp="raft.time_pressure2"
-                                flashing
-                                class="textXl fontWeightBold"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        v-if="raft.pressure1Valid && raft.pressure2Valid"
-                        class="
-                            grow
-                            flex column alignCenter justifyCenter
-                        "
-                    >
-                        <Icon
-                            size="xl"
-                        >
-                            check_circle
-                        </Icon>
-                    </div>
-                </div>
-            </div>
+            <DefaultRafts
+                v-if="raftCount && !isStandup"
+                :rafts="tiles[props.tileRef].rafts"
+                :standup="false"
+                :raftOrientation="raftOrientation"
+            />
         </div>
     </div>
 </template>
@@ -251,6 +177,7 @@ const checkpointStatus = computed(() => {
     outline: 1px solid rgba(255, 255, 255, 0.141);
     border-radius: 5px;
     box-shadow: 0 0 10px black;
+    overflow: hidden;
 }
 
 .tile.existing {

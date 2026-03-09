@@ -48,6 +48,10 @@
 .grow3 {flex-grow: 3;}
 .grow4 {flex-grow: 4;}
 
+.gap1 {gap: 1px;}
+.gap2 {gap: 2px;}
+.gap3 {gap: 3px;}
+.gap4 {gap: 4px;}
 .gap5 {gap: 5px;}
 .gap10 {gap: 10px;}
 .gap15 {gap: 15px;}

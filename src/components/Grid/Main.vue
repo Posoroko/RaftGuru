@@ -19,17 +19,26 @@ import Tile from '../Tile/Main.vue'
             <div 
                 class="cell"
             >
-                <Tile tileRef="A-0" />
+                <Tile 
+                    tileRef="A-0" 
+                    raftOrientation="east"
+                />
             </div>
             
             <div class="cell">
-                <Tile tileRef="A-1" />
+                <Tile
+                    tileRef="A-1"
+                    raftOrientation="south"
+                />
             </div>
 
             <div 
-                class="cell"
+                class="cell "
             >
-                <Tile tileRef="A-2" />
+                <Tile
+                    tileRef="A-2"
+                    raftOrientation="south"
+                />
             </div>
         </div>
 
@@ -43,19 +52,28 @@ import Tile from '../Tile/Main.vue'
             <div 
                 class="cell"
             >
-                <Tile tileRef="B-0" />
+                <Tile
+                    tileRef="B-0"
+                    raftOrientation="east"
+                />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Tile tileRef="B-1" />
+                <Tile
+                    tileRef="B-1"
+                    raftOrientation="south"
+                />
             </div>
 
             <div 
                 class="cell"
             >
-                <Tile tileRef="B-2" />
+                <Tile
+                    tileRef="B-2"
+                    raftOrientation="west"
+                />
             </div>
         </div>
 
@@ -69,19 +87,28 @@ import Tile from '../Tile/Main.vue'
             <div 
                 class="cell"
             >
-                <Tile tileRef="C-0" />
+                <Tile
+                    tileRef="C-0"
+                    raftOrientation="east"
+                />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Tile tileRef="C-1" />
+                <Tile
+                    tileRef="C-1"
+                    raftOrientation="south"
+                />
             </div>
 
             <div 
                 class="cell"
             >
-                <Tile tileRef="C-2" />
+                <Tile
+                    tileRef="C-2"
+                    raftOrientation="west"
+                />
             </div>
         </div>
 
@@ -95,19 +122,28 @@ import Tile from '../Tile/Main.vue'
             <div 
                 class="cell"
             >
-                <Tile tileRef="D-0" />
+                <Tile
+                    tileRef="D-0"
+                    raftOrientation="east"
+                />
             </div>
 
             <div 
                 class="cell walkway"
             >
-                <Tile tileRef="D-1" />
+                <Tile
+                    tileRef="D-1"
+                    raftOrientation="south"
+                />
             </div>
 
             <div 
                 class="cell"
             >
-                <Tile tileRef="D-2" />
+                <Tile
+                    tileRef="D-2"
+                    raftOrientation="west"
+                />
             </div>
         </div>
     </div>
@@ -123,7 +159,11 @@ import Tile from '../Tile/Main.vue'
     height: 25%;
     gap: 5px;
 }
-
+.cell {
+    overflow: hidden;
+    background-color: #ffffff08;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.04);
+}
 /* Row A: equal width cells */
 .equalCells .cell {
     flex: 1;

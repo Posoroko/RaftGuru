@@ -4,6 +4,12 @@
 
 A simple app to help life raft servicing technicians track inflation tests and measurement deadlines.
 
+## Push notification server
+
+A nitro app is running to handle push.
+It subscribes to directus collecitons to follow what's going on and
+it sneds push notification to users that subscribed to them.
+
 ## Work Environment
 
 - **Location**: Hangar with foam/vinyl flooring for knee protection and raft safety
