@@ -123,7 +123,7 @@ const checkpointStatus = computed(() => {
 </script>
 
 <template>
-    <div 
+    <button 
 
         class="
             tile
@@ -132,7 +132,7 @@ const checkpointStatus = computed(() => {
             pointer
         "
         :class="checkpointStatus || (tileExists ? 'activeSurface': '')"
-        @click="handleClick"
+        @click.prevent.stop="handleClick"
     >
         <div
             v-if="currentBatch.id"
@@ -168,7 +168,7 @@ const checkpointStatus = computed(() => {
                 :raftOrientation="raftOrientation"
             />
         </div>
-    </div>
+    </button>
 </template>
 
 <style scoped>
