@@ -16,7 +16,7 @@ const inflationTime = ref<Date | null>(null)
 const time_pressure1 = ref<string | null>(null)
 const time_pressure2 = ref<string | null>(null)
 const serialNumber = ref<string>('SN')
-const letters = ['SN', 'E', 'F', 'G', 'H']
+const letters = ['SN-', 'E-', 'F-', 'G-', 'H-', 'J-']
 
 const selectedLetter = computed(() => {
     if (serialNumber.value.startsWith('SN')) return 'SN'
