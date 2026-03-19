@@ -20,7 +20,7 @@ const letters = ['SN-', 'E-', 'F-', 'G-', 'H-', 'J-']
 
 const selectedLetter = computed(() => {
     if (serialNumber.value.startsWith('SN')) return 'SN'
-    const firstChar = serialNumber.value.charAt(0).toUpperCase()
+    const firstChar = serialNumber.value.slice(0,2).toUpperCase()
     return letters.includes(firstChar) ? firstChar : null
 })
 
