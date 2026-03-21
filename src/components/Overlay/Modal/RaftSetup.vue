@@ -132,6 +132,7 @@ function handleCancel() {
                     :key="letter"
                     @click.prevent.stop="selectLetter(letter)"
                     class="
+                        grow
                         flex alignCenter justifyCenter
                         pointer pad10 radius8
                     "

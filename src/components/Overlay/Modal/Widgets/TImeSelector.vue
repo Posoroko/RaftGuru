@@ -19,8 +19,8 @@ const currentHour = computed(() => now.value.getHours())
 const currentMinuteTen = computed(() => now.value.getMinutes())
 
 const selectedHour = ref<number>(now.value.getHours())
-const selectedMinuteTen = ref<number>(now.value.getMinutes())
-const addFiveMin = ref<boolean>(false)
+const selectedMinuteTen = ref<number>(Math.floor(now.value.getMinutes() / 10) * 10)
+const addFiveMin = ref<boolean>(now.value.getMinutes() % 10 >= 5)
 
 const selectedTime = computed(() => {
     const date = new Date()
@@ -57,8 +57,8 @@ function toggleAddFiveMin() {
 function handleResetToCurrentTime() {
     const currentRounded = roundToNearestFive(new Date())
     selectedHour.value = currentRounded.getHours()
-    selectedMinuteTen.value = currentRounded.getMinutes()
-    addFiveMin.value = false
+    selectedMinuteTen.value = Math.floor(currentRounded.getMinutes() / 10) * 10
+    addFiveMin.value = currentRounded.getMinutes() % 10 >= 5
     emit('timeChange', selectedTime.value)
 }
 
