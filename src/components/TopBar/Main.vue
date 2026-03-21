@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import Icon from '../Icon/Main.vue'
 import Menu from './Menu/Main.vue'
+import Logo from '@/components/Widgets/PlastimoLogo.vue'
 
 const props = defineProps({
     keepScreenOn: {
@@ -48,30 +49,62 @@ onMounted(() => {
     <div 
         class="
             topBar
-            flex justifyBetween alignCenter
-            pad5
+            flex
         "
     >
-        <!-- Wake Lock Indicator -->
-        <div v-if="keepScreenOn" class="wakeLockIndicator" :class="wakeLockStatus">
-            <span class="indicator-dot" :class="wakeLockStatus"></span>
-            <icon size="sm">mobile_check</icon>
+        <div
+            class="
+                barBox
+                flex gap10
+                h100
+            "
+        >
+            <div
+                class="logoBox"
+            >
+                <Logo layout="logo" />
+            </div>
+
+            <!-- Wake Lock Indicator -->
+            <div 
+                v-if="keepScreenOn" 
+                class="wakeLockIndicator" 
+                :class="wakeLockStatus"
+            >
+                <span 
+                    class="indicator-dot" 
+                    :class="wakeLockStatus"></span>
+            </div>
         </div>
-        <div v-else></div>
+
         <p 
             class="
+                barBox
                 currentTime
                 text2xl
+                centered
             "
         >
             {{ currentTime }}
         </p>
-        <button 
-            class="menuButton"
-            @click="showMenu = !showMenu"
+
+        <div
+            class="
+                barBox
+                flex justifyEnd
+            "
         >
-            <icon size="lg">menu</icon>
-        </button>
+            <div 
+                class="
+                    menuButton
+                    flex alignCenter
+                    pointer
+                "
+                @click="showMenu = !showMenu"
+            >
+                <icon size="lg">menu</icon>
+            </div>
+        </div>
 
         <!-- Menu Component -->
         <Menu 
@@ -85,16 +118,26 @@ onMounted(() => {
 .topBar {
     border-bottom: 1px solid var(--border-color, #444);
     position: relative;
+    padding: 3px 6px;
+}
+
+.logoBox {
+    height: 100%;
+    padding: 10px 0;
+    display: none;
+}
+
+.plastimoBranding .logoBox {
+    display: block;
+}
+
+.barBox {
+    width: 33.333333%;
 }
 
 .menuButton {
     background: none;
     border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .wakeLockIndicator {

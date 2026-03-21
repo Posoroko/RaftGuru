@@ -6,6 +6,7 @@ import Overlay from './components/Overlay/Main.vue'
 import { useAppInit } from './composables/appInit'
 import { useStorage } from './composables/useStorage'
 import { useWakeLock } from './composables/useWakeLock'
+import appConfig from './composables/appConfig'
 
 const { value: keepScreenOn } = useStorage('keepScreenOn', false)
 const { requestWakeLock, releaseWakeLock, isActive, status } = useWakeLock()
@@ -45,7 +46,11 @@ watch(keepScreenOn, async (newVal) => {
             typographyCss_FontSizeRem
             flex column
             relative
+            plastimoBrand
         "
+        :class="[
+            appConfig.plastimoBranding ? 'plastimoBranding' : 'genericBranding'
+        ]"
     >
         <TopBar :keepScreenOn="keepScreenOn" :wakeLockStatus="status" />
 

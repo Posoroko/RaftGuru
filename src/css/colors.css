@@ -2,12 +2,13 @@
 
 :root {
 
-    
+    /* Website doesnt use the same blue as the logo . is it an erro ? */
+    --color-plastimo-blue-website: #033260;
+    --color-plastimo-blue-logo: #003878;
+    --color-plastimo-blue: var(--color-plastimo-blue-logo);
+    --color-plastimo-red: #e01a1f;
 
-    /* Main colors */
-    --color-bg: #1d2630;          /* Dark background */
-    --color-accent: #2a4b50;      /* Cyan - panels, modals, buttons */
-    --color-accent-faded: #233437;
+    
     --color-text: #ffffff;        /* White text */
 
     --text-color-light: #cdc4ac;
@@ -25,6 +26,20 @@
     --outline-fiveMinutes: rgba(249, 174, 35, 0.651);;
     --bgc-reached: rgba(255, 0, 0, 0.371);
     --outline-reached: rgba(255, 0, 0, 0.545);
+}
+
+.genericBranding {
+    /* Main colors */
+    --color-bg: #1d2630;          /* Dark background */
+    --color-accent: #2a4b50;      /* Cyan - panels, modals, buttons */
+    --color-accent-faded: #233437;
+}
+
+.plastimoBranding {
+    /* Main colors */
+    --color-bg: #001b39;  
+    --color-accent: #002856;      /* Cyan - panels, modals, buttons */
+    --color-accent-faded: #294e78;
 }
 
 body {

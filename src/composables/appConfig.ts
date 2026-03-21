@@ -1,3 +1,4 @@
 export default {
-    dbUrl: 'https://db.raftguru.posoroko.com'
+    dbUrl: 'https://db.raftguru.posoroko.com',
+    plastimoBranding: false
 }

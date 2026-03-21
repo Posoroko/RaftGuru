@@ -16,24 +16,13 @@ const inflationTime = ref<Date | null>(null)
 const time_pressure1 = ref<string | null>(null)
 const time_pressure2 = ref<string | null>(null)
 
-const serialNumber = ref<string>('SN')
-const letters = ['SN', 'E', 'F', 'G', 'H']
+const serialNumber = ref<string>('')
+const letters = ['SN', 'E', 'F', 'G', 'H', 'J', 'K']
 
-const selectedLetter = computed(() => {
-    if (serialNumber.value.startsWith('SN')) return 'SN'
-    const firstChar = serialNumber.value.charAt(0).toUpperCase()
-    return letters.includes(firstChar) ? firstChar : null
-})
+const selectedLetter = ref('SN')
 
 function selectLetter(letter: string) {
-    let currentNumber = serialNumber.value
-    // Remove any existing letter prefix (SN or single letter)
-    if (currentNumber.startsWith('SN')) {
-        currentNumber = currentNumber.slice(2)
-    } else if (/^[A-H]/.test(currentNumber)) {
-        currentNumber = currentNumber.slice(1)
-    }
-    serialNumber.value = letter + currentNumber
+    selectedLetter.value = letter
 }
 
 function getLocalISOString(date: Date): string {
@@ -74,7 +63,7 @@ async function handleSubmit() {
             time_pressure2: time_pressure2.value,
             pressure1Valid: false,
             pressure2Valid: false,
-            ...(serialNumber.value && { serialNumber: serialNumber.value })
+            serialNumber:  `${selectedLetter.value}-${serialNumber.value}`
         }
 
         if (mode.value === 'reset' && resetRaftId.value) {
@@ -151,13 +140,26 @@ function handleCancel() {
                     {{ letter }}
                 </button>
             </div>
-            <input 
-                v-model="serialNumber"
-                type="text"
-                inputmode="numeric"
-                placeholder="no. de série"
-                class="w100 pad10 notActiveSurface"
-            />
+            <div
+                class="flex alignCenter gap5"
+            >
+
+                <p>
+                    {{ selectedLetter }}
+                </p>
+
+                <p>
+                    -
+                </p>
+
+                <input 
+                    v-model="serialNumber"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="no. de série"
+                    class="w100 pad10 notActiveSurface"
+                />
+            </div>
         </div>
 
         <div 
@@ -241,5 +243,7 @@ function handleCancel() {
 }
 input{
     outline: none;
+    border: none;
+    border-radius: 10px;
 }
 </style>
