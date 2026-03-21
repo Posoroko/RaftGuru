@@ -8,6 +8,8 @@
     --color-plastimo-blue: var(--color-plastimo-blue-logo);
     --color-plastimo-red: #e01a1f;
 
+    /* color of the page background in desktop browser, outside of the appBox */
+    --page-bg: #15171a;
     
     --color-text: #ffffff;        /* White text */
 

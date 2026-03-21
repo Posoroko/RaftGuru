@@ -46,7 +46,6 @@ watch(keepScreenOn, async (newVal) => {
             typographyCss_FontSizeRem
             flex column
             relative
-            plastimoBrand
         "
         :class="[
             appConfig.plastimoBranding ? 'plastimoBranding' : 'genericBranding'
@@ -62,7 +61,7 @@ watch(keepScreenOn, async (newVal) => {
 
 <style>
 #app {
-    background-color: var(--color-bg);
+    background-color: var(--page-bg);
 }
 </style>
 
