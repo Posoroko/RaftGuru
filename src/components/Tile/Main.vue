@@ -143,6 +143,7 @@ const checkpointStatus = computed(() => {
             <Icon
                 v-if="!tileExists"
                 size="xl"
+                class="addIcon"
             >
                 add
             </Icon>
@@ -178,7 +179,9 @@ const checkpointStatus = computed(() => {
     box-shadow: 0 0 10px black;
     overflow: hidden;
 }
-
+.addIcon {
+    color: rgba(255, 255, 255, 0.216);
+}
 .tile.existing {
     outline: 1px solid rgba(143, 255, 128, 0.141);
     background-color: rgb(34, 65, 34);
