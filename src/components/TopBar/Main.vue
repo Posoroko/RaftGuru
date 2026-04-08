@@ -61,14 +61,14 @@ onMounted(() => {
             "
         >
             <div
-                class="viewButton pointer"
+                class="viewButton pointer centered h100"
                 :class="{ activeView: appState.activeView === 'grid' }"
                 @click="appState.activeView = 'grid'"
             >
                 <Icon>apps</Icon>
             </div>
             <div
-                class="viewButton pointer"
+                class="viewButton pointer centered h100"
                 :class="{ activeView: appState.activeView === 'inventory' }"
                 @click="appState.activeView = 'inventory'"
             >
@@ -137,6 +137,7 @@ onMounted(() => {
 }
 
 .viewButton {
+    width: 40px;
     opacity: 0.4;
 }
 .viewButton.activeView {

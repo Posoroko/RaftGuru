@@ -68,7 +68,7 @@ const activeItems = computed(() => {
         <!-- Active checklist -->
         <template v-else>
             <div class="flex alignCenter gap10">
-                <div class="pointer flex alignCenter" @click="goBack">
+                <div class="pointer flex alignCenter pad5" @click="goBack">
                     <Icon>arrow_back</Icon>
                 </div>
                 <h2>{{ activeChecklist.label }}</h2>
@@ -92,8 +92,8 @@ const activeItems = computed(() => {
                     @click="toggleItem(entry.itemId)"
                 >
                     <Icon size="sm">{{ entry.icon }}</Icon>
-                    <span class="grow">{{ entry.name }}</span>
-                    <span class="qty">{{ entry.qty }}</span>
+                    <span class="grow textLg">{{ entry.name }}</span>
+                    <span class="qty textLg">{{ entry.qty }}</span>
                     <Icon>{{ checked.has(entry.itemId) ? 'check_box' : 'check_box_outline_blank' }}</Icon>
                 </div>
             </div>

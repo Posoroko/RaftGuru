@@ -152,7 +152,7 @@ export const inventoryItems: InventoryItem[] = [
     },
     {
         id: 'water',
-        name: 'Eau (par personne)',
+        name: 'Eau',
         icon: 'water_drop',
         storedInBag: false
     },
@@ -164,7 +164,7 @@ export const inventoryItems: InventoryItem[] = [
     },
     {
         id: 'food-ration',
-        name: 'Rations alimentaires (par personne)',
+        name: 'Rations alimentaires',
         icon: 'restaurant',
         storedInBag: false
     },
