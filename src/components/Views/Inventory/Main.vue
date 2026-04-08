@@ -49,7 +49,7 @@ const activeItems = computed(() => {
     >
         <!-- Checklist selection -->
         <template v-if="!activeChecklist">
-            <h2 class="pad5">Checklists Sac d'armement</h2>
+            <h2 class="pad5">Checklists Accastillage</h2>
 
             <div
                 v-for="option in checklistOptions"
