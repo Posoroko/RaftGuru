@@ -57,7 +57,7 @@ const activeItems = computed(() => {
                 class="
                     checklistButton
                     pad10
-                    pointer
+                    pointer grow flex alignCenter textXl fontWeightBold
                 "
                 @click="openChecklist(option)"
             >
@@ -105,6 +105,7 @@ const activeItems = computed(() => {
 .checklistButton {
     background-color: var(--color-accent);
     border-radius: 4px;
+    padding-left: 30px;
 }
 .checklistRow {
     border-bottom: 1px solid var(--color-accent);
