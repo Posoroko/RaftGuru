@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, watch } from 'vue'
-import GridMain from './components/Grid/Main.vue'
+import GridMain from './components/Views/Grid/Main.vue'
+import InventoryMain from './components/Views/Inventory/Main.vue'
+import { appState } from './composables/appState'
 import TopBar from './components/TopBar/Main.vue'
 import Overlay from './components/Overlay/Main.vue'
 import { useAppInit } from './composables/appInit'
@@ -53,7 +55,8 @@ watch(keepScreenOn, async (newVal) => {
     >
         <TopBar :keepScreenOn="keepScreenOn" :wakeLockStatus="status" />
 
-         <GridMain />
+        <GridMain v-if="appState.activeView === 'grid'" />
+        <InventoryMain v-else-if="appState.activeView === 'inventory'" />
 
         <Overlay />
     </div>

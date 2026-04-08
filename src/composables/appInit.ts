@@ -1,4 +1,4 @@
-import { useAppState } from './useAppState'
+import { appState } from './appState'
 import { useAuth } from './useAuth'
 import { initializeCurrentBatch } from './testProcess'
 import { initializeSubscriptions } from './subscriptions'
@@ -6,7 +6,6 @@ import { useUser } from '@/composables/useUser'
 import { useStorage } from '@/composables/useStorage'
 
 export const useAppInit = async () => {
-    const appState = useAppState()
     const { autoLogin } = useAuth()
     const { value: keepScreenOn } = useStorage('keepScreenOn', false)
 

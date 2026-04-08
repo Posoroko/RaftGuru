@@ -44,3 +44,53 @@ Start a new test now ? custom time ?
 click now
 
 test is reseted, new time is displayed.
+
+
+Inventory notes
+
+
+item dans le sac d'armement :
+
+Bailer
+Sponge
+Paddle
+Repair kit
+Fishing kit
+Survival and inspection booklet
+Aids to survival
+Bellows
+Waterproof torch
+Spare batteries
+Spare bulb
+Parachute distress signals
+Handflares
+Smoke signal
+Chemical light sticks
+Table of rescue signals
+Whistle
+Signalling mirror
+First aid kit
+Anti seasickness pills
+Seasickness bag per person
+Marked measure
+
+rations:
+Water per person
+Food per person
+
+
+rafts:
+
+TYPE I (ISO 9650-1) – hauturier
+4 / 6 / 8 / 10 / 12 personnes
+< 24h - léger
+> 24h - lourd (eau + rations + matériel supplémentaire)
+
+TYPE II (ISO 9650-2) - Coastal
+4 / 6 / 8 personnes
+
+CRUISER
+STD,ORC,ORC+,GR,TR,AUS
+
+IBIZA
+4 / 6 / 8 / 10 personnes

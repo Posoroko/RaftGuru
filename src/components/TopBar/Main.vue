@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import Icon from '../Icon/Main.vue'
 import Menu from './Menu/Main.vue'
 import Logo from '@/components/Widgets/PlastimoLogo.vue'
+import { appState } from '@/composables/appState'
 
 const props = defineProps({
     keepScreenOn: {
@@ -55,38 +56,48 @@ onMounted(() => {
         <div
             class="
                 barBox
-                flex gap10
+                flex gap10 alignCenter
                 h100
             "
         >
             <div
-                class="logoBox"
+                class="viewButton pointer"
+                :class="{ activeView: appState.activeView === 'grid' }"
+                @click="appState.activeView = 'grid'"
             >
-                <Logo layout="logo" />
+                <Icon>apps</Icon>
             </div>
-
-            <!-- Wake Lock Indicator -->
-            <div 
-                v-if="keepScreenOn" 
-                class="wakeLockIndicator" 
-                :class="wakeLockStatus"
+            <div
+                class="viewButton pointer"
+                :class="{ activeView: appState.activeView === 'inventory' }"
+                @click="appState.activeView = 'inventory'"
             >
-                <span 
-                    class="indicator-dot" 
-                    :class="wakeLockStatus"></span>
+                <Icon>list</Icon>
             </div>
         </div>
 
-        <p 
+        <div 
             class="
                 barBox
-                currentTime
-                text2xl
-                centered
+                flex alignCenter justifyCenter gap5
             "
         >
-            {{ currentTime }}
-        </p>
+            <p 
+                class="
+                    currentTime
+                    text2xl
+                "
+            >
+                {{ currentTime }}
+            </p>
+
+            <!-- Wake Lock Indicator -->
+            <span 
+                v-if="keepScreenOn" 
+                class="indicator-dot" 
+                :class="wakeLockStatus"
+            ></span>
+        </div>
 
         <div
             class="
@@ -121,29 +132,20 @@ onMounted(() => {
     padding: 3px 6px;
 }
 
-.logoBox {
-    height: 100%;
-    padding: 10px 0;
-    display: none;
-}
-
-.plastimoBranding .logoBox {
-    display: block;
-}
-
 .barBox {
     width: 33.333333%;
+}
+
+.viewButton {
+    opacity: 0.4;
+}
+.viewButton.activeView {
+    opacity: 1;
 }
 
 .menuButton {
     background: none;
     border: none;
-}
-
-.wakeLockIndicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .indicator-dot {

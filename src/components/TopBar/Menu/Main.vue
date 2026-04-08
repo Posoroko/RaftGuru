@@ -54,13 +54,12 @@ const handleToggleScreenOn = async () => {
         <div class="menuContent">
             <!-- User Info -->
             <button 
-                class="userButton"
+                class="userButton flex alignCenter gap10"
                 @click="handleOpenUserModal"
             >
-                <div class="menuSection">
-                    <p class="menuLabel">User</p>
-                    <p class="menuValue">{{ userState.first_name || 'Unknown' }}</p>
-                </div>
+                <Icon>person</Icon>
+
+                <p class="menuValue">{{ userState.first_name || 'Unknown' }}</p>
             </button>
 
             <!-- Always On Button -->
@@ -80,7 +79,7 @@ const handleToggleScreenOn = async () => {
                 @click="handleCloseBatch"
             >
                 <icon size="md">close</icon>
-                <span>Close Batch</span>
+                <span>Supprimer la série</span>
             </button>
 
             <!-- Logout Button -->
@@ -89,7 +88,7 @@ const handleToggleScreenOn = async () => {
                 @click="handleLogout"
             >
                 <icon size="md">logout</icon>
-                <span>Logout</span>
+                <span>Déconnexion</span>
             </button>
         </div>
     </div>

@@ -1,6 +1,6 @@
 <script setup>
 import { useUser } from '@/composables/useUser'
-import { useAppState } from '@/composables/useAppState'
+import { appState } from '@/composables/appState'
 import Login from './Login.vue'
 import NewBatch from './NewBatch.vue'
 import { useModal } from '@/composables/useModal'
