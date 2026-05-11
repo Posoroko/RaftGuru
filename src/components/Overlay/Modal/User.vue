@@ -1,13 +1,12 @@
 <script setup>
 import Icon from '@/components/Icon/Main.vue'
 import { useModal } from '@/composables/useModal'
-import { useUser } from '@/composables/useUser'
+import { userState } from '@/composables/user'
 import FirstName from './FirstName.vue'
 import Email from './Email.vue'
 import Password from './Password.vue'
 
 const { showModal, confirm } = useModal()
-const { userState } = useUser()
 
 const openFirstNameModal = async () => {
     const result = await showModal(FirstName)

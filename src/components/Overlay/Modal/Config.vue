@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Icon from '@/components/Icon/Main.vue'
-import { getConfig, createNewBatch } from '@/composables/testProcess'
+import { getConfig, updateConfig } from '@/composables/testProcess'
 import { useModal } from '@/composables/useModal'
 
-const { confirm, cancel } = useModal()
+const { confirm } = useModal()
 
 const weekHourCount = ref(35)
 const technicianCount = ref(2)
@@ -26,29 +26,40 @@ function increment() {
     technicianCount.value++
 }
 
-async function handleStart() {
-    await createNewBatch(weekHourCount.value, technicianCount.value)
+const dayHours = computed(() => weekHourCount.value === 35 ? 7.5 : 8.5)
+const dailyObjective = computed(() => Math.floor(technicianCount.value * dayHours.value / 2))
+
+async function handleSave() {
+    await updateConfig({
+        weekHourCount: weekHourCount.value,
+        technicianCount: technicianCount.value
+    })
     confirm()
 }
 </script>
 
 <template>
     <div class="flex column gap25">
-        <h2 class="fS18 weight6">Nouvelle série</h2>
+        <h2 class="fS18 weight6">Configuration</h2>
 
         <!-- Week hours -->
-        <div class="flex column gap10">
-            <span class="fS14 textColorLight">Heures hebdomadaires</span>
-            <div class="flex gap10">
+        <div class="flex justifyCenter alignCenter gap10">
+            <Icon
+                size="xl"
+            >
+                schedule
+            </Icon>
+
+            <div class="flex gap20">
                 <button
-                    class="hourBtn pointer pad10 fS16 weight6 grow"
+                    class="hourBtn pointer pad10 fS16 weight6"
                     :class="{ active: weekHourCount === 35 }"
                     @click="weekHourCount = 35"
                 >
                     35h
                 </button>
                 <button
-                    class="hourBtn pointer pad10 fS16 weight6 grow"
+                    class="hourBtn pointer pad10 fS16 weight6"
                     :class="{ active: weekHourCount === 39 }"
                     @click="weekHourCount = 39"
                 >
@@ -58,8 +69,13 @@ async function handleStart() {
         </div>
 
         <!-- Technician count -->
-        <div class="flex column gap10">
-            <Icon size="md">person</Icon>
+        <div class="flex marTop20 justifyCenter alignCenter gap10">
+            <Icon 
+                size="xl"
+                class="textColorLight"
+            >
+                person
+            </Icon>
             <div class="flex alignCenter gap15">
                 <button
                     class="counterBtn pointer centered"
@@ -79,12 +95,21 @@ async function handleStart() {
             </div>
         </div>
 
-        <!-- Start -->
+        <!-- Daily objective -->
+        <div class="flex column alignCenter gap5 marTop20">
+            <span class="fS14 textColorLight">Objectif journalier</span>
+            <div class="flex alignCenter gap15">
+                <span class="fS22 weight6">{{ dailyObjective }}</span>
+                <Icon size="md">houseboat</Icon>
+            </div>
+        </div>
+
+        <!-- Save -->
         <button
-            class="startBtn pointer pad10 fS18 weight6"
-            @click="handleStart"
+            class="saveBtn pointer pad10 centered"
+            @click="handleSave"
         >
-            Commencer
+            Enregistrer
         </button>
     </div>
 </template>
@@ -115,13 +140,13 @@ async function handleStart() {
     background: rgba(255, 255, 255, 0.08);
 }
 
-.startBtn {
+.saveBtn {
     border-radius: 6px;
     background-color: var(--color-btn);
     border: none;
 }
 
-.startBtn:hover {
+.saveBtn:hover {
     opacity: 0.9;
 }
 </style>

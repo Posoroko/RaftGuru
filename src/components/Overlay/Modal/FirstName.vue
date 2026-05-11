@@ -2,11 +2,10 @@
 import { ref } from 'vue'
 import Icon from '@/components/Icon/Main.vue'
 import { useModal } from '@/composables/useModal'
-import { useUser } from '@/composables/useUser'
+import { userState } from '@/composables/user'
 import { dbPatch } from '@/composables/fetch'
 
 const { confirm, cancel } = useModal()
-const { userState } = useUser()
 
 const firstName = ref(userState.value.first_name)
 const isLoading = ref(false)

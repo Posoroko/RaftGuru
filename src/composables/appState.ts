@@ -3,7 +3,7 @@ import { ref } from 'vue'
 export const appState = ref<{
     initialized: boolean
     activeBatch: any
-    activeView: 'grid' | 'inventory'
+    activeView: 'grid' | 'inventory' | 'history' | 'products'
 }>({
     initialized: false,
     activeBatch: null,

@@ -1,11 +1,15 @@
 <script setup>
 import Icon from '../../Icon/Main.vue'
 import User from '../../Overlay/Modal/User.vue'
-import { currentBatch, closeBatch } from '../../../composables/testProcess'
-import { useUser } from '../../../composables/useUser'
+import CloseBatchModal from '../../Overlay/Modal/CloseBatch.vue'
+import NewBatchModal from '../../Overlay/Modal/NewBatch.vue'
+import ConfigModal from '../../Overlay/Modal/Config.vue'
+import { currentBatch, closeBatch, deleteBatch, hasIncompleteRafts } from '../../../composables/testProcess'
+import { userState, isConfigAdmin } from '../../../composables/user'
 import { useAuth } from '../../../composables/useAuth'
 import { useModal } from '../../../composables/useModal'
 import { useStorage } from '../../../composables/useStorage'
+import { appState } from '@/composables/appState'
 
 defineProps({
     isOpen: {
@@ -16,7 +20,6 @@ defineProps({
 
 const emit = defineEmits(['close'])
 
-const { userState } = useUser()
 const { logout } = useAuth()
 const { showModal } = useModal()
 const { value: keepScreenOn } = useStorage('keepScreenOn', false)
@@ -27,7 +30,35 @@ const handleOpenUserModal = async () => {
 }
 
 const handleCloseBatch = async () => {
-    await closeBatch()
+    const incomplete = hasIncompleteRafts()
+    console.log('[Menu] handleCloseBatch — incomplete:', incomplete)
+
+    emit('close')
+
+    if (incomplete) {
+        try {
+            const choice = await showModal(CloseBatchModal)
+            console.log('[Menu] user chose:', choice)
+            if (choice === 'close') {
+                await closeBatch()
+            } else if (choice === 'delete') {
+                await deleteBatch()
+            }
+        } catch {
+            // cancelled
+        }
+    } else {
+        await closeBatch()
+    }
+}
+
+const handleNewBatch = async () => {
+    emit('close')
+    await showModal(NewBatchModal)
+}
+
+const handleOpenHistory = () => {
+    appState.value.activeView = 'history'
     emit('close')
 }
 
@@ -42,6 +73,11 @@ const handleToggleScreenOn = async () => {
     keepScreenOn.value = newVal
     console.log('[Menu] keepScreenOn is now:', keepScreenOn.value)
     emit('close')
+}
+
+const handleOpenConfig = async () => {
+    emit('close')
+    await showModal(ConfigModal)
 }
 </script>
 
@@ -62,6 +98,15 @@ const handleToggleScreenOn = async () => {
                 <p class="menuValue">{{ userState.first_name || 'Unknown' }}</p>
             </button>
 
+            <!-- History Button -->
+            <button 
+                class="historyButton flex alignCenter gap10"
+                @click="handleOpenHistory"
+            >
+                <icon size="md">history</icon>
+                <span>Historique</span>
+            </button>
+
             <!-- Always On Button -->
             <button 
                 class="alwaysOnButton"
@@ -72,6 +117,16 @@ const handleToggleScreenOn = async () => {
                 <span>Always On</span>
             </button>
 
+            <!-- New Batch Button -->
+            <button 
+                v-if="!currentBatch.id"
+                class="newBatchButton flex alignCenter gap10"
+                @click="handleNewBatch"
+            >
+                <icon size="md">add_circle</icon>
+                <span>Nouvelle série</span>
+            </button>
+
             <!-- Close Batch Button -->
             <button 
                 v-if="currentBatch.id"
@@ -79,7 +134,17 @@ const handleToggleScreenOn = async () => {
                 @click="handleCloseBatch"
             >
                 <icon size="md">close</icon>
-                <span>Supprimer la série</span>
+                <span>Fermer la série</span>
+            </button>
+
+            <!-- Config Button (configAdmin only) -->
+            <button 
+                v-if="isConfigAdmin"
+                class="configButton flex alignCenter gap10"
+                @click="handleOpenConfig"
+            >
+                <icon size="md">settings</icon>
+                <span>Configuration</span>
             </button>
 
             <!-- Logout Button -->
@@ -150,6 +215,36 @@ const handleToggleScreenOn = async () => {
     border-color: rgba(0, 217, 255, 0.3);
 }
 
+.newBatchButton {
+    padding: 8px 12px;
+    background: rgba(0, 217, 255, 0.05);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.newBatchButton:hover {
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
+}
+
+.configButton {
+    padding: 8px 12px;
+    background: rgba(0, 217, 255, 0.05);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.configButton:hover {
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
+}
+
 .closeButton {
     display: flex;
     align-items: center;
@@ -193,9 +288,9 @@ const handleToggleScreenOn = async () => {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: rgba(100, 100, 100, 0.2);
-    border: 1px solid rgba(100, 100, 100, 0.4);
-    color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 217, 255, 0.05);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    color: var(--text-primary, #fff);
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9em;
@@ -203,8 +298,8 @@ const handleToggleScreenOn = async () => {
 }
 
 .alwaysOnButton:hover {
-    background: rgba(100, 100, 100, 0.3);
-    border-color: rgba(100, 100, 100, 0.5);
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
 }
 
 .alwaysOnButton.active {
@@ -216,6 +311,25 @@ const handleToggleScreenOn = async () => {
 .alwaysOnButton.active:hover {
     background: rgba(76, 175, 80, 0.3);
     border-color: rgba(76, 175, 80, 0.7);
+}
+
+.historyButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0, 217, 255, 0.05);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    color: var(--text-primary, #fff);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.historyButton:hover {
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
 }
 </style>
 <!--

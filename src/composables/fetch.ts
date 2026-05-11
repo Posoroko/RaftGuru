@@ -44,7 +44,8 @@ async function dbFetch<T>(p: {
     })
 
     if (!response.ok) {
-        console.log('[dbFetch] : response.ok is not ok ')
+        const errorBody = await response.text()
+        console.error(`[dbFetch] ${p.method} ${p.endpoint} failed (${response.status}):`, errorBody)
         throw new Error(`${p.method} ${p.endpoint} failed: ${response.status}`)
     }
 

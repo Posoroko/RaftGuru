@@ -123,7 +123,7 @@ function startRaftsSubscription(batchId: string) {
                 reactToRaftDelete(msg.data[0])
             }
         },
-        { },
+        { tile: { batch: { _eq: batchId } } },
         ['*,tile.ref']
     )
     console.log('[raftsubscription] started for batch', batchId)
@@ -134,8 +134,8 @@ function startRaftsSubscription(batchId: string) {
  * Note: Since raft data comes through tile subscriptions, nothing to stop here
  */
 function stopRaftSubscription() {
-    // No separate raft subscription exists, so nothing to stop
-    console.log('[RaftSubscription] stopped (using tile subscriptions)')
+    removeSubscription('rafts-list')
+    console.log('[RaftSubscription] stopped')
 }
 
 /**

@@ -34,12 +34,14 @@ export {
 }
 
 function reactToBatchCreate(batch: any) {
+    console.log('[Reaction] batch CREATE fired, id:', batch.id)
     loadBatch(batch)
 }   
 /**
  * React to a batch events
  */
 async function reactToBatchUpdate(batch: any) {
+    console.log('[Reaction] batch UPDATE fired, id:', batch.id, '| isCurrent:', batch.isCurrent)
     if(!batch.isCurrent) {
         reactToBatchDelete()
         return
@@ -56,13 +58,14 @@ async function reactToBatchUpdate(batch: any) {
 
 function reactToBatchDelete() {
     try {
-        location.reload()
-        // resetCurrentBatchToDefault()
-        // resetTilesToDefault()
+        console.log('[Reaction] batch DELETE handler called')
+        stopBatchSubscriptions()
+        resetCurrentBatchToDefault()
+        resetTilesToDefault()
 
-        console.log('[Reaction] batch deleted, stopped subscriptions and cleared tiles:', batchId)
+        console.log('[Reaction] batch deleted, cleared state')
     } catch (err) {
-        console.error('[Reaction] failed to delete batch tiles')
+        console.error('[Reaction] failed to handle batch delete')
     }
 }
 
@@ -126,6 +129,7 @@ function reactToRaftDelete(raftId: any) {
  */
 function reactToTileCreate(tile: any) {
     try {
+        console.log('[Reaction] tile CREATE fired for:', tile.ref, '| has rafts:', tile.rafts?.length)
         tiles.value[tile.ref] = tile
         console.log('[Reaction] tile updated:', tile.ref)
     } catch (err) {
@@ -135,6 +139,7 @@ function reactToTileCreate(tile: any) {
 
 function reactToTileUpdate(tile: any) {
     try {
+        console.log('[Reaction] tile UPDATE fired for:', tile.ref, '| existing tile:', !!tiles.value[tile.ref])
         tiles.value[tile.ref] = {
             ...tile,
             rafts: tiles.value[tile.ref].rafts

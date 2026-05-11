@@ -14,7 +14,10 @@ export {
     currentTileForModal,
     initializeCurrentBatch,
 
-    createNewBatch, loadBatch, closeBatch, 
+    getConfig, updateConfig,
+    getProducts,
+    createNewBatch, loadBatch, closeBatch, deleteBatch, hasIncompleteRafts,
+    getClosedBatches, getBatchDetails,
     createTile, updateTile, deleteTile,
     createRaft, updateRaft, deleteRaft
 }
@@ -27,10 +30,12 @@ const DEFAULT_BATCH = {
 }
 
 function resetCurrentBatchToDefault() {
-    currentBatch.value = DEFAULT_BATCH
+    currentBatch.value = { ...DEFAULT_BATCH, tiles: [] }
 }
 function resetTilesToDefault() {
-    tiles.value = DEFAULT_TILES
+    console.log('[testProcess] resetTilesToDefault called')
+    tiles.value = { ...DEFAULT_TILES }
+    console.log('[testProcess] tiles after reset:', JSON.stringify(Object.entries(tiles.value).filter(([k,v]) => v !== null)))
 }
 const DEFAULT_TILES = {
     'A-0': null,
@@ -47,8 +52,8 @@ const DEFAULT_TILES = {
     'D-2': null
 }
 
-const currentBatch = ref<Batch<false>>(DEFAULT_BATCH)
-const tiles = ref<Record<TileRef, TileWithRafts | null>>(DEFAULT_TILES)
+const currentBatch = ref<Batch<false>>({ ...DEFAULT_BATCH, tiles: [] })
+const tiles = ref<Record<TileRef, TileWithRafts | null>>({ ...DEFAULT_TILES })
 
 // Track current tile for modal operations
 const currentTileForModal = ref<{ id: string; ref: TileRef } | null>(null)
@@ -126,13 +131,37 @@ async function loadBatch(batch: Batch<false>) {
 }
 
 /**
- * Close the current batch
+ * Close the current batch (keeps it in DB for history)
  */
 async function closeBatch() {
     try {
         if (!currentBatch.value.id) return
 
-        await dbDelete(`/items/batches/${currentBatch.value.id}`)
+        console.log('[testProcess] closing batch:', currentBatch.value.id)
+
+        // Check if any rafts exist in this batch
+        const hasRafts = Object.values(tiles.value).some(
+            tile => tile?.rafts?.length
+        )
+
+        if (hasRafts) {
+            // Keep batch for history
+            await dbPatch({
+                endpoint: `/items/batches/${currentBatch.value.id}`,
+                body: { 
+                    isCurrent: false
+                }
+            })
+            console.log('[testProcess] batch closed (kept for history)')
+        } else {
+            // No rafts — delete the batch entirely
+            await dbDelete(`/items/batches/${currentBatch.value.id}`)
+            console.log('[testProcess] empty batch deleted')
+        }
+
+        stopBatchSubscriptions()
+        resetCurrentBatchToDefault()
+        resetTilesToDefault()
 
         console.log('[testProcess] batch closed')
     } catch (err) {
@@ -141,14 +170,135 @@ async function closeBatch() {
 }
 
 /**
+ * Force delete the current batch (discards all data)
+ */
+async function deleteBatch() {
+    try {
+        if (!currentBatch.value.id) return
+
+        await dbDelete(`/items/batches/${currentBatch.value.id}`)
+
+        stopBatchSubscriptions()
+        resetCurrentBatchToDefault()
+        resetTilesToDefault()
+
+        console.log('[testProcess] batch deleted')
+    } catch (err) {
+        console.error('[testProcess] failed to delete batch:', err)
+    }
+}
+
+/**
+ * Check if any rafts in the current batch have incomplete testing
+ * A raft is complete when both pressure1Valid and pressure2Valid are true
+ */
+function hasIncompleteRafts(): boolean {
+    const result = Object.values(tiles.value).some(tile => {
+        if (!tile?.rafts?.length) return false
+        return tile.rafts.some((raft: any) => 
+            !raft.pressure1Valid || !raft.pressure2Valid
+        )
+    })
+    console.log('[testProcess] hasIncompleteRafts:', result)
+    return result
+}
+
+/**
+ * Fetch closed batches for history view (paginated)
+ */
+async function getClosedBatches(offset = 0, limit = 10): Promise<ClosedBatchSummary[]> {
+    try {
+        const batches = await dbGet<ClosedBatchSummary[]>({
+            endpoint: '/items/batches',
+            query: {
+                filter: { 
+                    isCurrent: { 
+                        _eq: false
+                    }
+                },
+                fields: 'id,date_created,tiles.id,tiles.rafts.id',
+                sort: '-date_created',
+                limit,
+                offset
+            }
+        })
+        return batches || []
+    } catch (err) {
+        console.error('[testProcess] failed to fetch closed batches:', err)
+        return []
+    }
+}
+
+/**
+ * Fetch full details of a closed batch (tiles + rafts) for read-only display
+ */
+async function getBatchDetails(batchId: string) {
+    try {
+        const tiles = await dbGet<any[]>({
+            endpoint: '/items/tiles',
+            query: {
+                filter: { batch: { _eq: batchId } },
+                fields: '*,rafts.*'
+            }
+        })
+        return tiles || []
+    } catch (err) {
+        console.error('[testProcess] failed to fetch batch details:', err)
+        return []
+    }
+}
+
+/**
+ * Fetch the app config singleton
+ */
+async function getConfig(): Promise<AppConfig | null> {
+    try {
+        const config = await dbGet<AppConfig>({
+            endpoint: '/items/config',
+            query: { fields: 'technicianCount,weekHourCount' }
+        })
+        return config || null
+    } catch (err) {
+        console.error('[testProcess] failed to fetch config:', err)
+        return null
+    }
+}
+
+async function updateConfig(updates: Partial<AppConfig>): Promise<void> {
+    try {
+        await dbPatch({
+            endpoint: '/items/config',
+            body: updates
+        })
+    } catch (err) {
+        console.error('[testProcess] failed to update config:', err)
+    }
+}
+
+async function getProducts(): Promise<Product[]> {
+    try {
+        const products = await dbGet<Product[]>({
+            endpoint: '/items/products',
+            query: { fields: 'id,name,expirationDate,batchNumber', sort: 'name' }
+        })
+        return products || []
+    } catch (err) {
+        console.error('[testProcess] failed to fetch products:', err)
+        return []
+    }
+}
+
+/**
  * Create a new batch and initialize it
  */
-async function createNewBatch() {
+async function createNewBatch(weekHourCount: number, technicianCount: number) {
     try {
         await dbPost<Batch<false>>({
             endpoint: '/items/batches',
             body: {
-                isCurrent: true
+                isCurrent: true,
+                weekHourCount,
+                technicianCount
             }
         })
     } catch (err) {
@@ -283,6 +433,14 @@ type Batch<StoreFormat extends boolean = true> = {
     tiles: StoreFormat extends true ? Tile[] : TileId[]
     date_created: Timestamp
     isCurrent: boolean
+    weekHourCount: number
+    technicianCount: number
+}
+
+type ClosedBatchSummary = {
+    id: BatchId
+    date_created: Timestamp
+    tiles: { id: TileId; rafts: { id: RaftId }[] }[]
 }
 
 type TileId = string
@@ -334,5 +492,17 @@ type Measure = {
     value: number
     user_created: UserId | User
     user_updated: UserId | User
+}
+
+type AppConfig = {
+    technicianCount: number
+    weekHourCount: 35 | 39
+}
+
+type Product = {
+    id: string
+    name: string
+    expirationDate: string
+    batchNumber: string
 }
 

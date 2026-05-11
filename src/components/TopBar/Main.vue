@@ -74,6 +74,13 @@ onMounted(() => {
             >
                 <Icon>list</Icon>
             </div>
+            <div
+                class="viewButton pointer centered h100"
+                :class="{ activeView: appState.activeView === 'products' }"
+                @click="appState.activeView = 'products'"
+            >
+                <Icon>shelves</Icon>
+            </div>
         </div>
 
         <div 

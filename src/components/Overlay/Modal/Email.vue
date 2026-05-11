@@ -1,12 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useModal } from '@/composables/useModal'
-import { useUser } from '@/composables/useUser'
+import { userState } from '@/composables/user'
 import { dbPatch } from '@/composables/fetch'
 import Icon from '@/components/Icon/Main.vue'
 
 const { confirm, cancel } = useModal()
-const { userState } = useUser()
 
 const email = ref('')
 const emailConfirm = ref('')

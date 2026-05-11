@@ -1,5 +1,5 @@
 import { dbPost } from './fetch'
-import { useUser } from './useUser'
+import { getUserData } from './user'
 import { initWebSocket } from './websocket'
 import { initializeCurrentBatch } from '@/composables/testProcess'
 
@@ -30,7 +30,6 @@ export const useAuth = () => {
 
         try {
             console.log('auto login, getting user data')
-            const { getUserData } = useUser()
             const result = await getUserData()
             await initializeCurrentBatch()
             await initWebSocket()

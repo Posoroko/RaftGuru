@@ -2,7 +2,7 @@ import { appState } from './appState'
 import { useAuth } from './useAuth'
 import { initializeCurrentBatch } from './testProcess'
 import { initializeSubscriptions } from './subscriptions'
-import { useUser } from '@/composables/useUser'
+import { userState } from '@/composables/user'
 import { useStorage } from '@/composables/useStorage'
 
 export const useAppInit = async () => {
@@ -21,8 +21,6 @@ export const useAppInit = async () => {
 
     // Initialize subscriptions after WebSocket is connected
     initializeSubscriptions()
-
-    const { userState } = useUser()
 
     // Initialize app with current batch from database
     if(userState.value.isLoggedIn) {

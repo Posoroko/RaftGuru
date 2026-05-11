@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import Icon from '../../Icon/Main.vue'
 import TimeSelector from '@/components/Overlay/Modal/Widgets/TImeSelector.vue'
 import TimeParser from '@/components/Widgets/TimeParser.vue'
@@ -16,6 +16,7 @@ const inflationTime = ref<Date | null>(null)
 const time_pressure1 = ref<string | null>(null)
 const time_pressure2 = ref<string | null>(null)
 
+const serialInput = ref<HTMLInputElement | null>(null)
 const serialNumber = ref<string>('')
 const letters = ['SN', 'E', 'F', 'G', 'H', 'J', 'K']
 
@@ -23,6 +24,7 @@ const selectedLetter = ref('SN')
 
 function selectLetter(letter: string) {
     selectedLetter.value = letter
+    nextTick(() => serialInput.value?.focus())
 }
 
 function getLocalISOString(date: Date): string {
@@ -155,6 +157,7 @@ function handleCancel() {
 
                 <input 
                     v-model="serialNumber"
+                    ref="serialInput"
                     type="text"
                     inputmode="numeric"
                     placeholder="no. de série"

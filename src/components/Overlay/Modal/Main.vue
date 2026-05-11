@@ -1,12 +1,10 @@
 <script setup>
-import { useUser } from '@/composables/useUser'
+import { userState } from '@/composables/user'
 import { appState } from '@/composables/appState'
 import Login from './Login.vue'
 import NewBatch from './NewBatch.vue'
 import { useModal } from '@/composables/useModal'
 import { currentBatch } from '@/composables/testProcess'
-
-const { userState } = useUser()
 
 const { modalState, showModal, cancel } = useModal()
 
@@ -33,30 +31,6 @@ const { modalState, showModal, cancel } = useModal()
             "
         >
             <Login />
-        </div>
-    </div>
-
-    <div
-        v-if="
-                userState.isLoggedIn 
-            &&  !currentBatch.id
-        "
-        class="
-            allEvents
-            backdrop
-            full
-            flex
-            alignCenter
-            justifyCenter
-            relative
-        "
-    >
-        <div 
-            class="
-                modal
-            "
-        >
-            <NewBatch />
         </div>
     </div>
 
