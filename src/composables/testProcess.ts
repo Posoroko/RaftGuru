@@ -279,7 +279,7 @@ async function getProducts(): Promise<Product[]> {
     try {
         const products = await dbGet<Product[]>({
             endpoint: '/items/products',
-            query: { fields: 'id,name,expirationDate,batchNumber', sort: 'name' }
+            query: { fields: 'id,name,expirationDate,batchNumber,category', sort: 'name' }
         })
         return products || []
     } catch (err) {
