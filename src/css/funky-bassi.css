@@ -1,0 +1,264 @@
+/* ============================================================================ */
+/* 🎸 FUNKY BASSI THEME 🎸                                                      */
+/* A JOKE. NOT FOR PRODUCTION. DELETE THIS FILE + its @import in _styles_.css  */
+/* ============================================================================ */
+
+/* ---- Keyframe animations -------------------------------------------------- */
+
+@keyframes funkyRainbowBg {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes funkyTopBarScroll {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 400% 0%; }
+}
+
+@keyframes funkyHueRotate {
+    0%   { filter: hue-rotate(0deg) brightness(1.3) saturate(2); }
+    100% { filter: hue-rotate(360deg) brightness(1.3) saturate(2); }
+}
+
+@keyframes funkyButtonPulse {
+    from { transform: scale(1) skewX(-1deg); box-shadow: 0 0 12px #ff00ff, 0 0 24px #00ffff; }
+    to   { transform: scale(1.04) skewX(1deg); box-shadow: 0 0 30px #ffff00, 0 0 50px #ff0080; }
+}
+
+@keyframes funkyBorderCycle {
+    0%   { border-color: #ff0000; outline-color: #ff0000; }
+    14%  { border-color: #ff6600; outline-color: #ff6600; }
+    28%  { border-color: #ffff00; outline-color: #ffff00; }
+    42%  { border-color: #00ff00; outline-color: #00ff00; }
+    57%  { border-color: #00ffff; outline-color: #00ffff; }
+    71%  { border-color: #0080ff; outline-color: #0080ff; }
+    85%  { border-color: #ff00ff; outline-color: #ff00ff; }
+    100% { border-color: #ff0000; outline-color: #ff0000; }
+}
+
+@keyframes funkyTextColors {
+    0%   { color: #ff0066 !important; }
+    16%  { color: #ff6600 !important; }
+    33%  { color: #ffff00 !important; }
+    50%  { color: #00ff88 !important; }
+    66%  { color: #00ffff !important; }
+    83%  { color: #ff00ff !important; }
+    100% { color: #ff0066 !important; }
+}
+
+@keyframes funkyGlowPulse {
+    from { box-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, inset 0 0 10px rgba(255,255,0,0.2); }
+    to   { box-shadow: 0 0 50px #ffff00, 0 0 80px #ff0080, 0 0 100px #00ff00, inset 0 0 25px rgba(255,0,255,0.3); }
+}
+
+@keyframes funkyIconBounce {
+    0%   { transform: translateY(0) rotate(-8deg) scale(1); }
+    50%  { transform: translateY(-4px) rotate(0deg) scale(1.2); }
+    100% { transform: translateY(0) rotate(8deg) scale(1); }
+}
+
+@keyframes funkyActivePulse {
+    from { box-shadow: 0 0 15px #ff00ff, inset 0 0 10px rgba(255,255,255,0.15); }
+    to   { box-shadow: 0 0 45px #ffff00, 0 0 70px #00ffff, inset 0 0 25px rgba(255,255,255,0.4); }
+}
+
+@keyframes funkyMenuGlow {
+    from { box-shadow: 0 0 30px #ff00ff, 0 0 50px #00ffff; }
+    to   { box-shadow: 0 0 60px #ffff00, 0 0 90px #ff0080, 0 0 120px #00ff00; }
+}
+
+@keyframes funkyButtonBgScroll {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 300% 0%; }
+}
+
+@keyframes funkyTimeBlink {
+    0%   { color: #ff0066 !important; text-shadow: 0 0 10px #ff00ff, 0 0 25px #ffff00 !important; }
+    25%  { color: #ffff00 !important; text-shadow: 0 0 10px #00ffff, 0 0 25px #ff00ff !important; }
+    50%  { color: #00ffff !important; text-shadow: 0 0 10px #ffff00, 0 0 25px #00ff00 !important; }
+    75%  { color: #00ff88 !important; text-shadow: 0 0 10px #ff0080, 0 0 25px #0080ff !important; }
+    100% { color: #ff0066 !important; text-shadow: 0 0 10px #ff00ff, 0 0 25px #ffff00 !important; }
+}
+
+/* ---- Root variable overrides ---------------------------------------------- */
+
+.funkyBassiTheme {
+    --color-bg:           #0a0018;
+    --color-accent:       #ff00cc;
+    --color-accent-faded: #330033;
+    --color-text:         #ffff00;
+    --text-color-light:   #00ffff;
+    --color-border:       #ff00ff;
+    --color-plastimo-blue: #ff6600;
+    --color-plastimo-red:  #00ff88;
+    --border-color:       #ff00ff;
+    --bg-dark:            #1a0033;
+    --text-primary:       #ffff00;
+    --text-muted:         #ff66ff;
+    --active-bgc:         rgba(255, 0, 200, 0.35);
+    --active-borderColor: rgba(255, 255, 0, 0.6);
+}
+
+/* ---- Comic Sans for EVERYTHING (except icons) ----------------------------- */
+
+.funkyBassiTheme,
+.funkyBassiTheme * {
+    font-family: "Comic Sans MS", "Comic Sans", cursive !important;
+}
+
+/* Keep Material Icons as their proper font */
+.funkyBassiTheme .material-symbols-outlined {
+    font-family: "Material Symbols Outlined" !important;
+}
+
+/* ---- App box: animated rainbow background ---------------------------------- */
+
+.funkyBassiTheme {
+    background: linear-gradient(270deg, #ff0080, #ff6600, #ffff00, #00ff88, #00ffff, #0080ff, #ff00ff, #ff0080) !important;
+    background-size: 1600% 1600% !important;
+    animation: funkyRainbowBg 4s ease infinite !important;
+}
+
+/* ---- Top bar: scrolling neon gradient ------------------------------------- */
+
+.funkyBassiTheme .topBar {
+    background: linear-gradient(90deg,
+        #ff0080, #ff6600, #ffff00, #00ff88, #00ffff, #0080ff, #ff00ff,
+        #ff0080, #ff6600, #ffff00, #00ff88, #00ffff, #0080ff, #ff00ff
+    ) !important;
+    background-size: 400% 100% !important;
+    animation: funkyTopBarScroll 1.5s linear infinite !important;
+    border-bottom: 4px dashed #ffff00 !important;
+    box-shadow: 0 6px 25px #ff00ff, 0 0 50px #00ffff !important;
+}
+
+/* ---- All text: neon glow -------------------------------------------------- */
+
+.funkyBassiTheme p,
+.funkyBassiTheme span:not(.material-symbols-outlined),
+.funkyBassiTheme label {
+    color: #ffff00 !important;
+    text-shadow: 0 0 6px #ff00ff, 0 0 14px #00ffff, 0 0 28px #ffff00 !important;
+}
+
+/* ---- Material icons: hue-rotating madness --------------------------------- */
+
+.funkyBassiTheme .material-symbols-outlined {
+    animation: funkyHueRotate 1.2s linear infinite !important;
+    color: #ff00ff !important;
+}
+
+/* ---- All buttons: tacky stripes + pulse ----------------------------------- */
+
+.funkyBassiTheme button {
+    border: 3px dashed #ff00ff !important;
+    border-radius: 0 !important;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 0, 128, 0.2),
+        rgba(255, 0, 128, 0.2) 6px,
+        rgba(0, 255, 255, 0.2) 6px,
+        rgba(0, 255, 255, 0.2) 12px
+    ) !important;
+    animation: funkyButtonPulse 0.9s ease-in-out alternate infinite !important;
+    color: #ffff00 !important;
+    text-shadow: 0 0 8px #ff00ff, 0 0 16px #00ffff !important;
+    box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, inset 0 0 8px rgba(255,255,0,0.15) !important;
+}
+
+/* ---- View buttons in topBar ----------------------------------------------- */
+
+.funkyBassiTheme .viewButton {
+    opacity: 1 !important;
+    animation: funkyIconBounce 0.6s ease-in-out infinite !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Stagger the bounce so they don't all jump together */
+.funkyBassiTheme .viewButton:nth-child(2) {
+    animation-delay: 0.2s !important;
+}
+.funkyBassiTheme .viewButton:nth-child(3) {
+    animation-delay: 0.4s !important;
+}
+
+/* ---- Time display: maximum drama ------------------------------------------ */
+
+.funkyBassiTheme .currentTime {
+    animation: funkyTimeBlink 0.4s steps(1) infinite !important;
+    font-size: 2rem !important;
+    letter-spacing: 5px !important;
+}
+
+/* ---- Menu dropdown: the horror -------------------------------------------- */
+
+.funkyBassiTheme .menuDropdown {
+    background: #0a0018 !important;
+    border: 4px solid #ff00ff !important;
+    border-top: 4px solid #ffff00 !important;
+    animation: funkyMenuGlow 1s ease-in-out alternate infinite !important;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 0, 255, 0.08) 10px,
+        rgba(255, 0, 255, 0.08) 20px
+    ) !important;
+}
+
+/* ---- Grid cells: cycling rainbow borders ---------------------------------- */
+
+.funkyBassiTheme .cell {
+    border: 3px solid #ff00ff !important;
+    animation: funkyBorderCycle 0.6s steps(1) infinite !important;
+    outline: 3px dotted #00ffff !important;
+    outline-offset: -5px !important;
+}
+
+/* Stagger cell animations so it looks extra chaotic */
+.funkyBassiTheme .cell:nth-child(2) { animation-delay: 0.1s !important; }
+.funkyBassiTheme .cell:nth-child(3) { animation-delay: 0.2s !important; }
+.funkyBassiTheme .cell:nth-child(4) { animation-delay: 0.3s !important; }
+.funkyBassiTheme .cell:nth-child(5) { animation-delay: 0.4s !important; }
+
+/* ---- Active / not-active surfaces ----------------------------------------- */
+
+.funkyBassiTheme .activeSurface {
+    background: linear-gradient(135deg, #ff0080, #ff6600, #ffff00, #00ff88) !important;
+    animation: funkyActivePulse 0.5s ease-in-out alternate infinite !important;
+}
+
+.funkyBassiTheme .notActiveSurface {
+    background: repeating-conic-gradient(
+        #330033 0% 25%,
+        #001a00 0% 50%
+    ) 0 0 / 16px 16px !important;
+}
+
+/* ---- The Funky Bassi toggle button itself (inside menu) ------------------- */
+
+/* Style even when theme is OFF so the user can find and click it */
+.funkyBassiButton {
+    background: linear-gradient(90deg, #ff0080, #ffff00, #00ffff, #ff00ff, #ff0080) !important;
+    background-size: 300% 100% !important;
+    border: 3px solid #ff00ff !important;
+    border-radius: 0 !important;
+    animation: funkyButtonBgScroll 0.8s linear infinite !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 15px #ff00ff, 0 0 30px #ffff00 !important;
+}
+
+.funkyBassiButton.active {
+    box-shadow: 0 0 25px #ff00ff, 0 0 50px #00ffff, 0 0 80px #ffff00 !important;
+    border-style: solid !important;
+    border-width: 4px !important;
+}
+
+/* ============================================================================ */
+/* END OF FUNKY BASSI THEME — DELETE ME                                         */
+/* ============================================================================ */

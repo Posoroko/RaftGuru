@@ -52,7 +52,8 @@ watch(keepScreenOn, async (newVal) => {
             relative
         "
         :class="[
-            appConfig.plastimoBranding ? 'plastimoBranding' : 'genericBranding'
+            appConfig.plastimoBranding ? 'plastimoBranding' : 'genericBranding',
+            appState.funkyBassi ? 'funkyBassiTheme' : ''  /* FUNKY BASSI — delete this line when removing the theme */
         ]"
     >
         <TopBar :keepScreenOn="keepScreenOn" :wakeLockStatus="status" />

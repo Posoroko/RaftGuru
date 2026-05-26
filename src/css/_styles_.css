@@ -5,4 +5,6 @@
 @import url('./colors.css');
 @import url('./icons.css');
 @import url('./posoroko.css');
-@import url('./typography.css'); 
+@import url('./typography.css');
+/* FUNKY BASSI THEME — DELETE THIS LINE (and funky-bassi.css) when done */
+@import url('./funky-bassi.css');

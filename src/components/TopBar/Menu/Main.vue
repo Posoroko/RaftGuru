@@ -79,6 +79,12 @@ const handleOpenConfig = async () => {
     emit('close')
     await showModal(ConfigModal)
 }
+
+// FUNKY BASSI — delete this handler when removing the theme
+const handleToggleFunkyBassi = () => {
+    appState.value.funkyBassi = !appState.value.funkyBassi
+    emit('close')
+}
 </script>
 
 
@@ -145,6 +151,16 @@ const handleOpenConfig = async () => {
             >
                 <icon size="md">settings</icon>
                 <span>Configuration</span>
+            </button>
+
+            <!-- FUNKY BASSI Button — delete this block when removing the theme -->
+            <button
+                class="funkyBassiButton flex alignCenter gap10"
+                :class="{ active: appState.funkyBassi }"
+                @click="handleToggleFunkyBassi"
+            >
+                <icon size="md">star</icon>
+                <span>{{ appState.funkyBassi ? '💀 FUNKY BASSI ON 💀' : '🎸 Funky Bassi 🎸' }}</span>
             </button>
 
             <!-- Logout Button -->
